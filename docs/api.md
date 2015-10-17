@@ -9,11 +9,13 @@ To instantiate a `Wildfly` class that will allow you to communicate with a WildF
 
 **Params**:
 
-* host (str): Refers to WildFly domain controller host address.
-* port (str): Port used by WildFly domain controller.
-* username (str): The username for authentication while connecting to the controller. Default: admin
-* password (str): The password for authentication while connecting to the controller. Default: admin
-* timeout (int): The HTTP request timeout, in milliseconds. Defaults to 5000 milliseconds.
+Name | Type | Default | Description
+--- | --- | --- | ---
+host | string | localhost | WildFly domain controller host address.
+port | string | 9990 | WildFly domain controller port.
+username | string | admin | The username for authentication while connecting to the controller.
+password | string | admin | The password for authentication while connecting to the controller.
+timeout | int | 5000 | The HTTP request timeout, in milliseconds.
 
 ****
 
