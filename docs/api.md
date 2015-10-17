@@ -1,6 +1,6 @@
 # Client API
 
-To instantiate a `Wildfly` class that will allow you to communicate with a WildFly domain controller  daemon, simply do:
+To instantiate a `Wildfly` class that will allow you to communicate with a WildFly domain controller, simply do:
 
 ```python
 >>> from wildfly import Wildfly
@@ -27,7 +27,7 @@ Prints the version info of the WildFly Application Server release.
 
 **Returns** (str): WildFly version.
 
-## operation
+## execute
 
 Run operation ...
 
