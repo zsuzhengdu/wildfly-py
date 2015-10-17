@@ -8,7 +8,9 @@ Installation
 
 You can install from source.
 
+```bash
 pip install  git+git://github.com/cenx-cf/wildfly-py
+```
 
 Documentation
 ------------
