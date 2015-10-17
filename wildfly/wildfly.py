@@ -92,7 +92,8 @@ class Wildfly:
     pass
     
   def deploy(self, groupId, artifactId, version, type='war', server_groups='A',
-             repository='releases', path=None):
+             path=None,
+             nexus_host='nexus.cenx.localnet', nexus_port='8081'):
 
     # TODO support new deploy and redeploy
     # TODO if deploy fails then show tail of logs
@@ -101,16 +102,19 @@ class Wildfly:
     if path is None:
       
       # deploy application from nexus
-      NEXUS_BASE_URL = 'http://nexus.cenx.localnet:8081/nexus/service/local/repositories'
-      url = '{0}/{1}/content/{2}/{3}/{4}/{3}-{4}.{5}'.format(NEXUS_BASE_URL, repository,
-                                                             groupId.replace('.', '/'),
-                                                             artifactId, version, type)
+      NEXUS_BASE_URL = 'http://{}:{}/nexus' \
+                       '/service/local/repo_groups/public/content'.format(nexus_host,
+                                                                          nexus_port)
+      url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(NEXUS_BASE_URL,
+                                                 groupId.replace('.', '/'),
+                                                 artifactId, version, type)
+      
       # upload artifact to deployment content repository
       response = self.execute('upload-deployment-url', {'url': url})
 
     else:
       # deploy application from local file path
-      # files = {'file': open('/devops/docker/deployer/test/{}.war'.format(name), 'rb')}
+      # files = {'file': open(path.format(artifactId, 'rb')}
       # response = self._post(self.endpoint + "/add-content", files=files)
       pass
 
