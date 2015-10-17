@@ -1,7 +1,7 @@
 wildfly-py
 =========
 
-This package contains a Python binding for the WildFly Management API.
+This package provides Python binding for the WildFly Management API.
 
 Installation
 ------------
