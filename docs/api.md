@@ -65,6 +65,17 @@ Stop all configured servers in the domain or specific server group that are curr
 
 **Returns** (requests.Response): response
 
+## reload-servers
+
+Reload all configured servers in the domain or specific server group that are currently running.
+
+**Parameters**:
+
+* server_group (str): Reload all servers within server group that are currently running. Default = None.
+* blocking (bool): Wait until the servers are fully reloaded before returning from the operation. Default = False.
+
+**Returns** (requests.Response): response
+
 ## restart-servers
 
 Restart all configured servers in the domain or specific server group that are currently running.
