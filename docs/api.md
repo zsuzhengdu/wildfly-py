@@ -23,20 +23,23 @@ timeout | int | 5000 | The HTTP request timeout, in milliseconds.
 
 Prints the version info of the WildFly Application Server release.
 
-**Params**:
+**Parameters**:
 
 * None
 
-**Returns** (str): WildFly version.
+**Returns**: (str): WildFly version.
 
 ## execute
 
 Run operation ...
 
-**Params**:
+**Parameters**:
 
-* address (str): The container to attach to
-* operation (bool): Get STDOUT
+Name | Type | Default | Description
+--- | --- | --- | ---
+address | dict | [] | The address of wildfly managment resource.
+operation | dict | | The operation to perfom on resource.
+parameters | dict | None | Parameters to pass to operation.
 
 **Returns** (str): The logs or output for the image
 
@@ -44,7 +47,7 @@ Run operation ...
 
 Starts all configured servers in the domain or specific server group that are not currently running.
 
-**Params**:
+**Parameters**:
 
 * server_group (str): Starts all servers within server group that are not currently running. Default = None.
 * blocking (bool): Wait until the servers are fully started before returning from the operation. Default = False.
@@ -55,7 +58,7 @@ Starts all configured servers in the domain or specific server group that are no
 
 Stop all configured servers in the domain or specific server group that are currently running.
 
-**Params**:
+**Parameters**:
 
 * server_group (str): Stops all servers within server group that are currently running. Default = None.
 * blocking (bool): Wait until the servers are fully stopped before returning from the operation. Default = False.
@@ -66,7 +69,7 @@ Stop all configured servers in the domain or specific server group that are curr
 
 Restart all configured servers in the domain or specific server group that are currently running.
 
-**Params**:
+**Parameters**:
 
 * server_group (str): Restart all servers within server group that are currently running. Default = None.
 * blocking (bool): Wait until the servers are fully restarted before returning from the operation. Default = False.
