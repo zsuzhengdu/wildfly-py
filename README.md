@@ -14,7 +14,7 @@ Documentation
 ------------
 
 Full documentation is hosted on [ReadTheDocs](http://wildfly-py.readthedocs.org/en/latest/).
-Sources are available in the `docs/` directory.
+Sources are available in the [docs](docs/) directory.
 
 
 License
