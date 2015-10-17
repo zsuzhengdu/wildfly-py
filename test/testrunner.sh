@@ -1,7 +1,3 @@
-# create machine
-# run wildlfy container
-# run unittests.py in wildfly-py container
-
 #!/usr/bin/env bash
 
 run() {
