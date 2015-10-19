@@ -27,7 +27,7 @@ Prints the version info of the WildFly Application Server release.
 
 **Returns** (str): WildFly version.
 
-## operation
+## execute
 
 Run operation ...
 
