@@ -1,6 +1,6 @@
 # Client API
 
-To instantiate a `Wildfly` class that will allow you to communicate with a WildFly domain controller  daemon, simply do:
+To instantiate a `Wildfly` class that will allow you to communicate with a WildFly domain controller, simply do:
 
 ```python
 >>> from wildfly import Wildfly
@@ -9,11 +9,13 @@ To instantiate a `Wildfly` class that will allow you to communicate with a WildF
 
 **Params**:
 
-* host (str): Refers to WildFly domain controller host address.
-* port (str): Port used by WildFly domain controller.
-* username (str): The username for authentication while connecting to the controller. Default: admin
-* password (str): The password for authentication while connecting to the controller. Default: admin
-* timeout (int): The HTTP request timeout, in milliseconds. Defaults to 5000 milliseconds.
+Name | Type | Default | Description
+--- | --- | --- | ---
+host | string | localhost | WildFly domain controller host address.
+port | string | 9990 | WildFly domain controller port.
+username | string | admin | The username for authentication while connecting to the controller.
+password | string | admin | The password for authentication while connecting to the controller.
+timeout | int | 5000 | The HTTP request timeout, in milliseconds.
 
 ****
 
@@ -21,20 +23,23 @@ To instantiate a `Wildfly` class that will allow you to communicate with a WildF
 
 Prints the version info of the WildFly Application Server release.
 
-**Params**:
+**Parameters**:
 
 * None
 
-**Returns** (str): WildFly version.
+**Returns**: (str): WildFly version.
 
 ## execute
 
 Run operation ...
 
-**Params**:
+**Parameters**:
 
-* address (str): The container to attach to
-* operation (bool): Get STDOUT
+Name | Type | Default | Description
+--- | --- | --- | ---
+address | dict | [] | The address of wildfly managment resource.
+operation | dict | | The operation to perfom on resource.
+parameters | dict | None | Parameters to pass to operation.
 
 **Returns** (str): The logs or output for the image
 
@@ -42,7 +47,7 @@ Run operation ...
 
 Starts all configured servers in the domain or specific server group that are not currently running.
 
-**Params**:
+**Parameters**:
 
 * server_group (str): Starts all servers within server group that are not currently running. Default = None.
 * blocking (bool): Wait until the servers are fully started before returning from the operation. Default = False.
@@ -53,10 +58,21 @@ Starts all configured servers in the domain or specific server group that are no
 
 Stop all configured servers in the domain or specific server group that are currently running.
 
-**Params**:
+**Parameters**:
 
 * server_group (str): Stops all servers within server group that are currently running. Default = None.
 * blocking (bool): Wait until the servers are fully stopped before returning from the operation. Default = False.
+
+**Returns** (requests.Response): response
+
+## reload-servers
+
+Reload all configured servers in the domain or specific server group that are currently running.
+
+**Parameters**:
+
+* server_group (str): Reload all servers within server group that are currently running. Default = None.
+* blocking (bool): Wait until the servers are fully reloaded before returning from the operation. Default = False.
 
 **Returns** (requests.Response): response
 
@@ -64,7 +80,7 @@ Stop all configured servers in the domain or specific server group that are curr
 
 Restart all configured servers in the domain or specific server group that are currently running.
 
-**Params**:
+**Parameters**:
 
 * server_group (str): Restart all servers within server group that are currently running. Default = None.
 * blocking (bool): Wait until the servers are fully restarted before returning from the operation. Default = False.

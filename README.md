@@ -1,20 +1,22 @@
 wildfly-py
 =========
 
-This package contains a Python binding for the WildFly Management API.
+This package provides Python binding for the WildFly Management API.
 
 Installation
 ------------
 
-Our latest stable is always available on PyPi.
+You can install from source.
 
-pip install wildfly-py
+```bash
+pip install  git+git://github.com/cenx-cf/wildfly-py
+```
 
 Documentation
 ------------
 
 Full documentation is hosted on [ReadTheDocs](http://wildfly-py.readthedocs.org/en/latest/).
-Sources are available in the `docs/` directory.
+Sources are available in the [docs](docs/) directory.
 
 
 License
