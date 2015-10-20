@@ -30,6 +30,10 @@ class Wildfly:
     self.port = port
     self.endpoint = 'http://{}:{}/management'.format(self.host, self.port)
 
+  def disconnect(self):
+    # not currently reusing/caching session/connection so no need for this
+    pass
+  
   def _post(self, request):
 
     logger.debug('Request: {}'.format(request))
@@ -37,12 +41,10 @@ class Wildfly:
     response = requests.post(self.endpoint, headers=headers,
                              auth=HTTPDigestAuth(self.username, self.password),
                              data=json.dumps(request))
-    if response.status_code == 200:
-      logger.debug('Status Code: {}: {}'.format(response.status_code, response.reason))
-    elif response.status_code == 204:
-      logger.debug('Status Code: {}: {}'.format(response.status_code, response.reason))
+    if response.status_code in [200, 204]:
+      logger.debug('Response Status Code: {}: {}'.format(response.status_code, response.reason))
     else:
-      logger.debug('Status Code: {}: {}'.format(response.status_code, response.reason))
+      logger.debug('Response Status Code: {}: {}'.format(response.status_code, response.reason))
       response.raise_for_status()
     logger.debug('Response: {}'.format(response.json()))
     return response
@@ -55,13 +57,36 @@ class Wildfly:
     response = self._post(request)
     return response
 
-  # read-attribute
+  def read_attribute(self, name, address=[], include_defaults=True):
+    """ Read attribute of resource. """
+
+    request = {'address': address, 'operation': 'read-attribute',
+               'name': name, 'include-defaults': include_defaults}
+    response = self._post(request)
+    return response.json()['result']
+
+  def write_attribute(self, name, value, address=[]):
+    """ Write value of attribute of resource. """
+
+    request = {'address': address, 'operation': 'write-attribute',
+               'name': name, 'value': value}
+    response = self._post(request)
+    return response
+  
+  def read_children_names(self, child_type, address=[]):
+    """ Returns a list of the names of all child resources of a given type. """
+
+    request = {'address': address, 'operation': 'read-children-names',
+               'child-type': child_type}
+    response = self._post(request)
+    return response.json()['result']
+    
   # read-resource
   
   def version(self):
     """ Prints version of WildFly. """
     
-    response = self.execute(operation='read-attribute', parameters={'name': 'release-version'})
+    response = self.read_attribute('release-version')
     return response.json()['result']
 
   def _server_operation(self, operation, server_group=None, blocking=False):
@@ -115,8 +140,12 @@ class Wildfly:
     else:
       # deploy application from local file path
       # files = {'file': open(path.format(artifactId, 'rb')}
-      # response = self._post(self.endpoint + "/add-content", files=files)
-      pass
+      files = {'file': open(path, 'rb')}
+      # logger.debug('Request: {}'.format(request))
+      response = requests.post(self.endpoint + '/add-content', files=files,
+                               auth=HTTPDigestAuth(self.username, self.password))
+      logger.debug('Response Status Code: {}: {}'.format(response.status_code, response.reason))
+      logger.debug('Response: {}'.format(response.json()))
 
     # add artifact to content repository
     byte_value = response.json()['result']['BYTES_VALUE']

@@ -23,11 +23,11 @@ setup(name='wildfly-py',
                    'Operating System :: Linux',
                    'Programming Language :: Python',
                    'Topic :: Utilities'],
-      entry_points={'console_scripts': ['deployer = wildfly.__main__:main'],
+      entry_points={'console_scripts': ['wildfly-py = wildfly.__main__:main'],
                     'setuptools.installation': ['eggsecutable = wildfly.__main__:main'], },
       author='CENX',
       author_email='support@cenx.com',
       license='Apache License 2.0',
-      keywords='cenx cortx wildfly',
+      keywords='cenx wildfly',
       url='https://github.org/cenx-cf/wildfly-py')
 

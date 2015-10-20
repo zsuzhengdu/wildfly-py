@@ -3,8 +3,8 @@
 To instantiate a `Wildfly` class that will allow you to communicate with a WildFly domain controller, simply do:
 
 ```python
->>> from wildfly import Wildfly
->>> client = Wildfly(host='localhost')
+from wildfly import Wildfly
+client = Wildfly(host='localhost')
 ```
 
 **Params**:
@@ -27,21 +27,21 @@ Prints the version info of the WildFly Application Server release.
 
 * None
 
-**Returns**: (str): WildFly version.
+**Returns**: (string): WildFly version.
 
 ## execute
 
-Run operation ...
+Execute operation against management resource.
 
 **Parameters**:
 
 Name | Type | Default | Description
 --- | --- | --- | ---
-address | dict | [] | The address of wildfly managment resource.
+address | list | [] | The address of wildfly managment resource.
 operation | dict | | The operation to perfom on resource.
 parameters | dict | None | Parameters to pass to operation.
 
-**Returns** (str): The logs or output for the image
+**Returns** (requests.Response): response from operation execution 
 
 ## start-servers
 
@@ -52,7 +52,7 @@ Starts all configured servers in the domain or specific server group that are no
 * server_group (str): Starts all servers within server group that are not currently running. Default = None.
 * blocking (bool): Wait until the servers are fully started before returning from the operation. Default = False.
 
-**Returns** (requests.Response): response
+**Returns** (requests.Response): 
 
 ## stop-servers
 
@@ -63,7 +63,7 @@ Stop all configured servers in the domain or specific server group that are curr
 * server_group (str): Stops all servers within server group that are currently running. Default = None.
 * blocking (bool): Wait until the servers are fully stopped before returning from the operation. Default = False.
 
-**Returns** (requests.Response): response
+**Returns** (requests.Response): 
 
 ## reload-servers
 
@@ -74,7 +74,7 @@ Reload all configured servers in the domain or specific server group that are cu
 * server_group (str): Reload all servers within server group that are currently running. Default = None.
 * blocking (bool): Wait until the servers are fully reloaded before returning from the operation. Default = False.
 
-**Returns** (requests.Response): response
+**Returns** (requests.Response): 
 
 ## restart-servers
 
@@ -85,7 +85,7 @@ Restart all configured servers in the domain or specific server group that are c
 * server_group (str): Restart all servers within server group that are currently running. Default = None.
 * blocking (bool): Wait until the servers are fully restarted before returning from the operation. Default = False.
 
-**Returns** (requests.Response): response
+**Returns** (requests.Response): 
 
 ## deploy
 

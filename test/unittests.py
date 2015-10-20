@@ -27,113 +27,6 @@ def setUpModule():
 
 def tearDownModule():
   remove_wildfly_service()
-
-  
-class VersionTest(unittest.TestCase):
-
-  wildfly = None
-  
-  def setUp(self):
-
-    wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
-    self.wildfly = Wildfly(wildfly_host)
-    
-  def tearDownM(self):
-
-    self.wildfly.disconnect()
-
-  def test_version(self):
-
-    try:
-      result = self.wildfly.version()
-    except Exception as e:
-      self.fail('version raised exception unexpectedly! Exception: {}.'.format(e))
-    self.assertEqual(result, '8.2.0.Final')
-
-
-class PullTest(unittest.TestCase):
-
-  wildfly = None
-    
-  def setUp(self):
-
-    wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
-    self.wildfly = Wildfly(wildfly_host)
-    
-  def tearDownM(self):
-
-    self.wildfly.disconnect()
-
-  def test_pull(self):
-
-    self.wildlfly.deploy('cenx', 'apollo', '1.0.0', 'A')
-
-    
-class DeployTest(unittest.TestCase):
-
-  wildfly = None
-    
-  def setUp(self):
-
-    wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
-    self.wildfly = Wildfly(wildfly_host)
-    
-  def tearDownM(self):
-
-    self.wildfly.disconnect()
-
-  def test_deploy_url(self):
-
-    self.wildfly.deploy('org.jboss.mod_cluster', 'mod_cluster-demo-server',
-                        '1.2.6.Final', 'war', 'A', 'thirdparty')
-    self.wildfly.undeploy('mod_cluster-demo-server')
-
-  def test_deploy_file(self):
-
-    self.wildfly.deploy('org.jboss.mod_cluster', 'mod_cluster-demo-server',
-                        '1.2.6.Final', 'war', 'A', 'thirdparty', path='/transport/x.war')
-    self.wildfly.undeploy('mod_cluster-demo-server')
-
-    
-class UndeployTest(unittest.TestCase):
-
-  wildfly = None
-    
-  def setUp(self):
-
-    wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
-    self.wildfly = Wildfly(wildfly_host)
-    
-  def tearDownM(self):
-
-    self.wildfly.disconnect()
-
-  def test_undeploy(self):
-
-    self.wildfly.deploy('org.jboss.mod_cluster', 'mod_cluster-demo-server',
-                        '1.2.6.Final', 'war', 'A', 'thirdparty')
-    self.wildfly.undeploy('mod_cluster-demo-server')
-
-
-class DeploymentInfoTest(unittest.TestCase):
-
-  wildfly = None
-    
-  def setUp(self):
-    wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
-    self.wildfly = Wildfly(wildfly_host)
-    self.wildfly.deploy('org.jboss.mod_cluster', 'mod_cluster-demo-server',
-                        '1.2.6.Final', 'A', 'thirdparty')
-
-  def tearDownM(self):
-    self.wildfly.undeploy('mod_cluster-demo-server')
-    self.wildfly.disconnect()
-    
-  def test_deployment_info(self):
-
-    info = self.wildfly.deployment_info()
-    expected = {'mod_cluster-demo-server.war': {'runtime-name': 'mod_cluster-demo-server.war'}}
-    self.assertEqual(info, expected)
     
     
 class ExecuteTest(unittest.TestCase):
@@ -160,6 +53,185 @@ class ExecuteTest(unittest.TestCase):
     operation = 'read-resource'
     address = [{'server-group': 'A'}]
     self.wildfly.execute(operation=operation, address=address)
+
+
+class ReadAttributeTest(unittest.TestCase):
+
+  wildfly = None
+    
+  def setUp(self):
+    wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
+    self.wildfly = Wildfly(wildfly_host)
+    
+  def tearDown(self):
+    self.wildfly.disconnect()
+
+  def test_read_attribute(self):
+    result = self.wildfly.read_attribute(address=[], name='process-type')
+    self.assertEqual(result, 'Domain Controller')
+
+    
+class WriteAttributeTest(unittest.TestCase):
+
+  wildfly = None
+    
+  def setUp(self):
+    wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
+    self.wildfly = Wildfly(wildfly_host)
+    
+  def tearDown(self):
+    self.wildfly.disconnect()
+
+  def test_read_attribute(self):
+    result = self.wildfly.read_attribute(address=[], name='process-type')
+    self.assertEqual(result, 'Domain Controller')
+
+    
+class ReadChildrenNamesTest(unittest.TestCase):
+
+  wildfly = None
+    
+  def setUp(self):
+    wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
+    self.wildfly = Wildfly(wildfly_host)
+    
+  def tearDown(self):
+    self.wildfly.disconnect()
+
+  def test_read_children_names(self):
+    result = self.wildfly.read_children_names(address=[], child_type='server-group')
+    self.assertIsNotNone(result)
+    self.assertEquals(result[0], 'A')
+
+    
+class VersionTest(unittest.TestCase):
+
+  wildfly = None
+  
+  def setUp(self):
+
+    wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
+    self.wildfly = Wildfly(wildfly_host)
+    
+  def tearDown(self):
+
+    self.wildfly.disconnect()
+
+  def test_version(self):
+
+    try:
+      result = self.wildfly.version()
+    except Exception as e:
+      self.fail('version raised exception unexpectedly! Exception: {}.'.format(e))
+    self.assertEqual(result, '8.2.0.Final')
+
+
+class PullTest(unittest.TestCase):
+
+  wildfly = None
+    
+  def setUp(self):
+
+    wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
+    self.wildfly = Wildfly(wildfly_host)
+    
+  def tearDown(self):
+
+    self.wildfly.disconnect()
+
+  def test_pull(self):
+
+    self.wildlfly.deploy('cenx', 'apollo', '1.0.0', 'A')
+
+    
+class DeployTest(unittest.TestCase):
+
+  wildfly = None
+    
+  def setUp(self):
+
+    wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
+    self.wildfly = Wildfly(wildfly_host)
+    
+  def tearDown(self):
+
+    self.wildfly.disconnect()
+
+  def test_deploy_url(self):
+
+    groupId = 'org.jboss.mod_cluster'
+    artifactId = 'mod_cluster-demo-server'
+    version = '1.2.6.Final'
+    
+    try:
+      self.wildfly.deploy(groupId, artifactId, version)
+    except Exception as e:
+      self.fail('deploy raised exception unexpectedly! Exception: {}.'.format(e))
+      
+    result = self.wildfly.read_attribute('enabled',
+                                         [{'server-group': 'A'},
+                                          {'deployment': '{}.war'.format(artifactId)}])
+    self.assertTrue(result == 'true')
+    self.wildfly.undeploy(artifactId)
+
+  def test_deploy_file(self):
+
+    groupId = 'org.jboss.mod_cluster'
+    artifactId = 'mod_cluster-demo-server'
+    version = '1.2.6.Final'
+
+    try:
+      self.wildfly.deploy(groupId, artifactId, version,
+                          path='/transport/{}-{}.war'.format(artifactId, version))
+    except Exception as e:
+      self.fail('deploy raised exception unexpectedly! Exception: {}.'.format(e))
+      
+    result = self.wildfly.read_attribute('enabled',
+                                         [{'server-group': 'A'},
+                                          {'deployment': '{}.war'.format(artifactId)}])
+    self.assertTrue(result == 'true')
+    self.wildfly.undeploy(artifactId)
+
+    
+class UndeployTest(unittest.TestCase):
+
+  wildfly = None
+    
+  def setUp(self):
+
+    wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
+    self.wildfly = Wildfly(wildfly_host)
+    
+  def tearDown(self):
+
+    self.wildfly.disconnect()
+
+  def test_undeploy(self):
+
+    self.wildfly.deploy('org.jboss.mod_cluster', 'mod_cluster-demo-server',
+                        '1.2.6.Final', 'war', 'A', 'thirdparty')
+    self.wildfly.undeploy('mod_cluster-demo-server')
+
+
+class DeploymentInfoTest(unittest.TestCase):
+
+  wildfly = None
+    
+  def setUp(self):
+    wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
+    self.wildfly = Wildfly(wildfly_host)
+    self.wildfly.deploy('org.jboss.mod_cluster', 'mod_cluster-demo-server',
+                        '1.2.6.Final', 'A', 'thirdparty')
+
+  def tearDown(self):
+    self.wildfly.undeploy('mod_cluster-demo-server')
+    self.wildfly.disconnect()
+    
+  def test_deployment_info(self):
+
+    info = self.wildfly.deployment_info()
+    expected = {'mod_cluster-demo-server.war': {'runtime-name': 'mod_cluster-demo-server.war'}}
+    self.assertEqual(info, expected)
     
     
 class StartServersTest(unittest.TestCase):
@@ -170,7 +242,7 @@ class StartServersTest(unittest.TestCase):
     wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
     self.wildfly = Wildfly(wildfly_host)
     
-  def tearDownM(self):
+  def tearDown(self):
     self.wildfly.disconnect()
 
   def test_start_servers(self):
@@ -192,7 +264,7 @@ class StopServersTest(unittest.TestCase):
     wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
     self.wildfly = Wildfly(wildfly_host)
     
-  def tearDownM(self):
+  def tearDown(self):
     self.wildfly.disconnect()
 
   def test_stop_servers(self):
@@ -222,7 +294,7 @@ class ReloadServersTest(unittest.TestCase):
     wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
     self.wildfly = Wildfly(wildfly_host)
     
-  def tearDownM(self):
+  def tearDown(self):
     self.wildfly.disconnect()
 
   def test_reload_servers(self):
@@ -242,7 +314,7 @@ class RestartServersTest(unittest.TestCase):
     wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
     self.wildfly = Wildfly(wildfly_host)
     
-  def tearDownM(self):
+  def tearDown(self):
     self.wildfly.disconnect()
 
   def test_restart_servers(self):
@@ -262,7 +334,7 @@ class ReadLogFileTest(unittest.TestCase):
     wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
     self.wildfly = Wildfly(wildfly_host)
     
-  def tearDownM(self):
+  def tearDown(self):
     self.wildfly.disconnect()
 
   def test_log_file(self):

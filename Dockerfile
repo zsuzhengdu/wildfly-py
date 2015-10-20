@@ -12,8 +12,10 @@ MAINTAINER CENX "cenx.com"
 RUN /usr/bin/dnf install -y git python-pip python-crypto gcc python-devel && \
     pip install --upgrade pip
 
-#ADD . /tmp/wildfly-py
-#WORKDIR /tmp/wildfly-py
-#RUN pip install -e .
-
-ENTRYPOINT ["/usr/bin/wildfly-py"]
+ADD . /code
+WORKDIR /code
+RUN pip install -r requirements.txt
+# Deploy the project source in “Development Mode”
+#RUN pip install --editable .
+#xRUN pip install .
+#ENTRYPOINT ["/usr/bin/wildfly-py"]
