@@ -3,11 +3,25 @@
 import os
 import unittest
 from wildfly import Wildfly
+from requests import HTTPError
 
 
 def suite():
   suite = unittest.TestSuite()
-  suite.addTest(PullTest('test_pull'))
+  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(ExecuteTest))
+  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(ReadAttributeTest))
+  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(WriteAttributeTest))
+  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(ReadChildrenNamesTest))
+  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(VersionTest))
+  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(PullTest))
+  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(DeployTest))
+  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(UndeployTest))
+  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(DeploymentInfoTest))
+  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(StartServersTest))
+  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(StopServersTest))
+  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(ReloadServersTest))
+  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(RestartServersTest))
+  suite.addTest(unittest.TestLoader().loadTestsFromTestCase(ReadLogFileTest))
   return suite
 
 
@@ -129,6 +143,9 @@ class VersionTest(unittest.TestCase):
 class PullTest(unittest.TestCase):
 
   wildfly = None
+  groupId = 'org.jboss.mod_cluster'
+  artifactId = 'mod_cluster-demo-server'
+  version = '1.2.6.Final'
     
   def setUp(self):
 
@@ -141,12 +158,16 @@ class PullTest(unittest.TestCase):
 
   def test_pull(self):
 
-    self.wildlfly.deploy('cenx', 'apollo', '1.0.0', 'A')
+    self.wildfly.pull(self.groupId, self.artifactId, self.version)
+    self.wildfly.undeploy(self.artifactId)
 
     
 class DeployTest(unittest.TestCase):
 
   wildfly = None
+  groupId = 'org.jboss.mod_cluster'
+  artifactId = 'mod_cluster-demo-server'
+  version = '1.2.6.Final'
     
   def setUp(self):
 
@@ -156,46 +177,42 @@ class DeployTest(unittest.TestCase):
   def tearDown(self):
 
     self.wildfly.disconnect()
-
+    # TODO need to ensure that deployment fixture is removed if test fails
+    
   def test_deploy_url(self):
 
-    groupId = 'org.jboss.mod_cluster'
-    artifactId = 'mod_cluster-demo-server'
-    version = '1.2.6.Final'
-    
     try:
-      self.wildfly.deploy(groupId, artifactId, version)
+      self.wildfly.deploy(self.groupId, self.artifactId, self.version)
     except Exception as e:
       self.fail('deploy raised exception unexpectedly! Exception: {}.'.format(e))
       
     result = self.wildfly.read_attribute('enabled',
                                          [{'server-group': 'A'},
-                                          {'deployment': '{}.war'.format(artifactId)}])
-    self.assertTrue(result == 'true')
-    self.wildfly.undeploy(artifactId)
+                                          {'deployment': '{}.war'.format(self.artifactId)}])
+    self.assertTrue(result)
+    self.wildfly.undeploy(self.artifactId)
 
   def test_deploy_file(self):
 
-    groupId = 'org.jboss.mod_cluster'
-    artifactId = 'mod_cluster-demo-server'
-    version = '1.2.6.Final'
-
     try:
-      self.wildfly.deploy(groupId, artifactId, version,
-                          path='/transport/{}-{}.war'.format(artifactId, version))
+      self.wildfly.deploy(self.groupId, self.artifactId, self.version,
+                          path='/transport/{}-{}.war'.format(self.artifactId, self.version))
     except Exception as e:
       self.fail('deploy raised exception unexpectedly! Exception: {}.'.format(e))
       
     result = self.wildfly.read_attribute('enabled',
                                          [{'server-group': 'A'},
-                                          {'deployment': '{}.war'.format(artifactId)}])
-    self.assertTrue(result == 'true')
-    self.wildfly.undeploy(artifactId)
+                                          {'deployment': '{}.war'.format(self.artifactId)}])
+    self.assertTrue(result)
+    self.wildfly.undeploy(self.artifactId)
 
     
 class UndeployTest(unittest.TestCase):
 
   wildfly = None
+  groupId = 'org.jboss.mod_cluster'
+  artifactId = 'mod_cluster-demo-server'
+  version = '1.2.6.Final'
     
   def setUp(self):
 
@@ -208,20 +225,25 @@ class UndeployTest(unittest.TestCase):
 
   def test_undeploy(self):
 
-    self.wildfly.deploy('org.jboss.mod_cluster', 'mod_cluster-demo-server',
-                        '1.2.6.Final', 'war', 'A', 'thirdparty')
-    self.wildfly.undeploy('mod_cluster-demo-server')
+    self.wildfly.deploy(self.groupId, self.artifactId, self.version)
+    self.wildfly.undeploy(self.artifactId)
 
+  def test_undeploy_not_deployed(self):
 
+    with self.assertRaises(HTTPError):
+      self.wildfly.undeploy(self.artifactId)
+
+    
 class DeploymentInfoTest(unittest.TestCase):
 
   wildfly = None
+  artifactId = 'mod_cluster-demo-server'
     
   def setUp(self):
     wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
     self.wildfly = Wildfly(wildfly_host)
     self.wildfly.deploy('org.jboss.mod_cluster', 'mod_cluster-demo-server',
-                        '1.2.6.Final', 'A', 'thirdparty')
+                        '1.2.6.Final', 'A')
 
   def tearDown(self):
     self.wildfly.undeploy('mod_cluster-demo-server')
@@ -344,4 +366,4 @@ class ReadLogFileTest(unittest.TestCase):
 
     
 if __name__ == '__main__':
-  unittest.main()
+  unittest.main(verbosity=2)

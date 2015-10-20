@@ -38,7 +38,7 @@ Execute operation against management resource.
 Name | Type | Default | Description
 --- | --- | --- | ---
 address | list | [] | The address of wildfly managment resource.
-operation | dict | | The operation to perfom on resource.
+operation | string | | The operation to perfom on resource.
 parameters | dict | None | Parameters to pass to operation.
 
 **Returns** (requests.Response): response from operation execution 
@@ -71,7 +71,7 @@ Reload all configured servers in the domain or specific server group that are cu
 
 **Parameters**:
 
-* server_group (str): Reload all servers within server group that are currently running. Default = None.
+* server_group (string): Reload all servers within server group that are currently running. Default = None.
 * blocking (bool): Wait until the servers are fully reloaded before returning from the operation. Default = False.
 
 **Returns** (requests.Response): 
@@ -82,7 +82,7 @@ Restart all configured servers in the domain or specific server group that are c
 
 **Parameters**:
 
-* server_group (str): Restart all servers within server group that are currently running. Default = None.
+* server_group (string): Restart all servers within server group that are currently running. Default = None.
 * blocking (bool): Wait until the servers are fully restarted before returning from the operation. Default = False.
 
 **Returns** (requests.Response): 
@@ -90,3 +90,7 @@ Restart all configured servers in the domain or specific server group that are c
 ## deploy
 
 ## undeploy
+
+## deployment_info
+
+

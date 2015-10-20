@@ -7,9 +7,8 @@ import logging
 
 # setup logging
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 ch.setFormatter(formatter)
 logger.addHandler(ch)
@@ -86,8 +85,8 @@ class Wildfly:
   def version(self):
     """ Prints version of WildFly. """
     
-    response = self.read_attribute('release-version')
-    return response.json()['result']
+    result = self.read_attribute('release-version')
+    return result
 
   def _server_operation(self, operation, server_group=None, blocking=False):
     if server_group:
@@ -112,12 +111,14 @@ class Wildfly:
     """ Restart all servers currently running in the domain or server_group. """
     return self._server_operation('restart-servers', server_group, blocking)
 
-  def pull():
+  def pull(self, groupId, artifactId, version, type='war', server_groups='A',
+           path=None, nexus_host='nexus.cenx.localnet', nexus_port='8081'):
     """ Pull artifact from artifact repository into wildfly content repository. """
-    pass
+    self.deploy(groupId, artifactId, version, type, server_groups,
+                path, enabled=False, nexus_host=nexus_host, nexus_port=nexus_port)
     
   def deploy(self, groupId, artifactId, version, type='war', server_groups='A',
-             path=None,
+             path=None, enabled=True,
              nexus_host='nexus.cenx.localnet', nexus_port='8081'):
 
     # TODO support new deploy and redeploy
@@ -157,7 +158,7 @@ class Wildfly:
     # add artifact to server-group(s)
     address = [{'server-group': server_groups},
                {'deployment': '{}.{}'.format(artifactId, type)}]
-    response = self.execute('add', {'enabled': 'true'}, address)
+    response = self.execute('add', {'enabled': enabled}, address)
 
   def deployment_info(self, name=None, server_group=None):
     """ Displays information about deployments. """
