@@ -125,7 +125,28 @@ Restart all configured servers in the domain or specific server group that are c
 
 ## deploy
 
+Deploy artifact to WildFly.
+
+**Parameters**:
+
+* groupId (string): 
+* artifactId (string):
+* version (string):
+* type (string): artifact packaging type. Default: war
+* server_groups (sting): Default: 'A'
+* path (string): Default: None
+* enabled (bool): Default: True
+
 ## undeploy
+
+Undeploy artifact from WildFly.
+
+**Parameters**:
+
+* artifactId (string):
+* type (string): artifact packaging type. Default: war
+* server_groups (sting): Default: all
+
 
 ## deployment_info
 
