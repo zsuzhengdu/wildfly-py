@@ -5,6 +5,11 @@ import unittest
 from wildfly import Wildfly
 from requests import HTTPError
 
+
+DEFAULT_GROUP_ID = 'org.jboss.mod_cluster'
+DEFAULT_ARTIFACT_ID = 'mod_cluster-demo-server'
+DEFAULT_ARTICT_VERSiON = '1.2.6.Final'
+
 wildfly = None
 
 
@@ -134,9 +139,9 @@ class VersionTest(unittest.TestCase):
 class PullTest(unittest.TestCase):
 
   global wildfly
-  groupId = 'org.jboss.mod_cluster'
-  artifactId = 'mod_cluster-demo-server'
-  version = '1.2.6.Final'
+  groupId = DEFAULT_GROUP_ID
+  artifactId = DEFAULT_ARTIFACT_ID
+  version = DEFAULT_ARTICT_VERSiON
     
   def test_pull(self):
 
@@ -147,9 +152,9 @@ class PullTest(unittest.TestCase):
 class DeployTest(unittest.TestCase):
 
   global wildfly
-  groupId = 'org.jboss.mod_cluster'
-  artifactId = 'mod_cluster-demo-server'
-  version = '1.2.6.Final'
+  groupId = DEFAULT_GROUP_ID
+  artifactId = DEFAULT_ARTIFACT_ID
+  version = DEFAULT_ARTICT_VERSiON
     
   def test_deploy_url(self):
 
@@ -182,9 +187,9 @@ class DeployTest(unittest.TestCase):
 class UndeployTest(unittest.TestCase):
 
   global wildfly
-  groupId = 'org.jboss.mod_cluster'
-  artifactId = 'mod_cluster-demo-server'
-  version = '1.2.6.Final'
+  groupId = DEFAULT_GROUP_ID
+  artifactId = DEFAULT_ARTIFACT_ID
+  version = DEFAULT_ARTICT_VERSiON
     
   def test_undeploy(self):
 
@@ -200,9 +205,9 @@ class UndeployTest(unittest.TestCase):
 class DeploymentInfoTest(unittest.TestCase):
 
   global wildfly
-  groupId = 'org.jboss.mod_cluster'
-  artifactId = 'mod_cluster-demo-server'
-  version = '1.2.6.Final'
+  groupId = DEFAULT_GROUP_ID
+  artifactId = DEFAULT_ARTIFACT_ID
+  version = DEFAULT_ARTICT_VERSiON
     
   def setUp(self):
     wildfly.deploy(self.groupId, self.artifactId, self.version)
