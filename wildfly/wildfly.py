@@ -185,7 +185,7 @@ class Wildfly:
     response = self.execute('add', {'enabled': enabled}, address)
 
   def deployment_info(self, name=None, server_group=None):
-    """ Displays information about deployments. """
+    """ Returns information about deployments. """
 
     # name, runtime_name, enabled, status
     response = self.execute('read-children-resources', {'child-type': 'deployment'})
