@@ -8,7 +8,7 @@ from requests import HTTPError
 
 DEFAULT_GROUP_ID = 'org.jboss.mod_cluster'
 DEFAULT_ARTIFACT_ID = 'mod_cluster-demo-server'
-DEFAULT_ARTICT_VERSiON = '1.2.6.Final'
+DEFAULT_ARTIFACT_VERSION = '1.2.6.Final'
 
 wildfly = None
 
@@ -139,78 +139,67 @@ class VersionTest(unittest.TestCase):
 class PullTest(unittest.TestCase):
 
   global wildfly
-  groupId = DEFAULT_GROUP_ID
-  artifactId = DEFAULT_ARTIFACT_ID
-  version = DEFAULT_ARTICT_VERSiON
     
   def test_pull(self):
 
-    wildfly.pull(self.groupId, self.artifactId, self.version)
-    wildfly.undeploy(self.artifactId)
+    wildfly.pull(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION)
+    wildfly.undeploy(DEFAULT_ARTIFACT_ID)
 
     
 class DeployTest(unittest.TestCase):
 
   global wildfly
-  groupId = DEFAULT_GROUP_ID
-  artifactId = DEFAULT_ARTIFACT_ID
-  version = DEFAULT_ARTICT_VERSiON
     
   def test_deploy_url(self):
 
     try:
-      wildfly.deploy(self.groupId, self.artifactId, self.version)
+      wildfly.deploy(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION)
     except Exception as e:
       self.fail('deploy raised exception unexpectedly! Exception: {}.'.format(e))
       
     result = wildfly.read_attribute('enabled',
                                     [{'server-group': 'A'},
-                                     {'deployment': '{}.war'.format(self.artifactId)}])
+                                     {'deployment': '{}.war'.format(DEFAULT_ARTIFACT_ID)}])
     self.assertTrue(result)
-    wildfly.undeploy(self.artifactId)
+    wildfly.undeploy(DEFAULT_ARTIFACT_ID)
 
   def test_deploy_file(self):
 
     try:
-      wildfly.deploy(self.groupId, self.artifactId, self.version,
-                     path='/transport/{}-{}.war'.format(self.artifactId, self.version))
+      wildfly.deploy(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION,
+                     path='/transport/{}-{}.war'.format(DEFAULT_ARTIFACT_ID,
+                                                        DEFAULT_ARTIFACT_VERSION))
     except Exception as e:
       self.fail('deploy raised exception unexpectedly! Exception: {}.'.format(e))
       
     result = wildfly.read_attribute('enabled',
                                     [{'server-group': 'A'},
-                                     {'deployment': '{}.war'.format(self.artifactId)}])
+                                     {'deployment': '{}.war'.format(DEFAULT_ARTIFACT_ID)}])
     self.assertTrue(result)
-    wildfly.undeploy(self.artifactId)
+    wildfly.undeploy(DEFAULT_ARTIFACT_ID)
 
     
 class UndeployTest(unittest.TestCase):
 
   global wildfly
-  groupId = DEFAULT_GROUP_ID
-  artifactId = DEFAULT_ARTIFACT_ID
-  version = DEFAULT_ARTICT_VERSiON
     
   def test_undeploy(self):
 
-    wildfly.deploy(self.groupId, self.artifactId, self.version)
-    wildfly.undeploy(self.artifactId)
+    wildfly.deploy(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION)
+    wildfly.undeploy(DEFAULT_ARTIFACT_ID)
 
   def test_undeploy_not_deployed(self):
 
     with self.assertRaises(HTTPError):
-      wildfly.undeploy(self.artifactId)
+      wildfly.undeploy(DEFAULT_ARTIFACT_ID)
 
     
 class DeploymentInfoTest(unittest.TestCase):
 
   global wildfly
-  groupId = DEFAULT_GROUP_ID
-  artifactId = DEFAULT_ARTIFACT_ID
-  version = DEFAULT_ARTICT_VERSiON
     
   def setUp(self):
-    wildfly.deploy(self.groupId, self.artifactId, self.version)
+    wildfly.deploy(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION)
 
   def tearDown(self):
     wildfly.undeploy('mod_cluster-demo-server')
@@ -218,8 +207,8 @@ class DeploymentInfoTest(unittest.TestCase):
   def test_deployment_info(self):
 
     info = wildfly.deployment_info()
-    expected = {'{}.war'.format(self.artifactId):
-                {'runtime-name': '{}.war'.format(self.artifactId)}}
+    expected = {'{}.war'.format(DEFAULT_ARTIFACT_ID):
+                {'runtime-name': '{}.war'.format(DEFAULT_ARTIFACT_ID)}}
     self.assertEqual(info, expected)
     
     
