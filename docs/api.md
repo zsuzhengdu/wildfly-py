@@ -50,11 +50,34 @@ response = client.execute('read-log-file', parameters, address)
 
 Name | Type | Default | Description
 --- | --- | --- | ---
-address | list | [] | The address of wildfly managment resource.
+address | list | [] | The address of wildfly management resource.
 operation | string | | The operation to perfom on resource.
 parameters | dict | None | Parameters to pass to operation.
 
 **Returns** (requests.Response): response from operation execution 
+
+## add
+
+Creates a new management resource.
+
+```python
+address = [{'profile': 'full-ha'},
+           {'subsystem': 'jmx'},
+           {'remoting-connector': 'jmx'}
+parameters = {'use-management-endpoint': 'false'}
+response = client.add(parameters, address)
+```
+
+## remove
+
+Remove existing management resource.
+
+```python
+address = [{'profile': 'full-ha'},
+           {'subsystem': 'jmx'},
+           {'remoting-connector': 'jmx'}
+response = client.remove(address)
+```
 
 ## start-servers
 

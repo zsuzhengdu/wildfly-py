@@ -55,7 +55,19 @@ class Wildfly:
     request.update(parameters)
     response = self._post(request)
     return response
+  
+  def add(self, address, parameters=None):
+    """ Creates a new management resource. """
 
+    response = self.execute('add', parameters, address)
+    return response
+
+  def remove(self, address):
+    """ Removes an existing resource. """
+
+    response = self.execute('remove', address=address)
+    return response
+    
   def read_attribute(self, name, address=[], include_defaults=True):
     """ Read attribute of resource. """
 
@@ -198,3 +210,15 @@ class Wildfly:
     parameters = {'name': 'server.log', 'tail': 'true', 'lines': '100'}
     response = self.execute('read-log-file', parameters, address)
     return response.json()['result']
+
+  def add_datasource():
+   pass
+
+  def remove_datasource():
+    pass
+
+  def add_jms_destination():
+    pass
+
+  def remove_jms_destination():
+    pass
