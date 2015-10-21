@@ -138,6 +138,7 @@ class Wildfly:
   def pull(self, groupId, artifactId, version, type='war', server_groups='A',
            path=None, nexus_host='nexus.cenx.localnet', nexus_port='8081'):
     """ Pull artifact from artifact repository into wildfly content repository. """
+    
     self.deploy(groupId, artifactId, version, type, server_groups,
                 path, enabled=False, nexus_host=nexus_host, nexus_port=nexus_port)
     
@@ -152,7 +153,6 @@ class Wildfly:
 
     if path is None:
       
-      # deploy application from nexus
       NEXUS_BASE_URL = 'http://{}:{}/nexus' \
                        '/service/local/repo_groups/public/content'.format(nexus_host,
                                                                           nexus_port)
@@ -160,14 +160,13 @@ class Wildfly:
                                                  groupId.replace('.', '/'),
                                                  artifactId, version, type)
       
-      # upload artifact to deployment content repository
+      # upload artifact from url to content repository
       response = self.execute('upload-deployment-url', {'url': url})
 
     else:
-      # deploy application from local file path
-      # files = {'file': open(path.format(artifactId, 'rb')}
+      
+      # upload artifact from local file path to content repository
       files = {'file': open(path, 'rb')}
-      # logger.debug('Request: {}'.format(request))
       response = requests.post(self.endpoint + '/add-content', files=files,
                                auth=HTTPDigestAuth(self.username, self.password))
       logger.debug('Response Status Code: {}: {}'.format(response.status_code, response.reason))
