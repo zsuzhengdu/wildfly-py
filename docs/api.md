@@ -33,6 +33,19 @@ Prints the version info of the WildFly Application Server release.
 
 Execute operation against management resource.
 
+Operation requests allow for low level interaction with the management model. The management model is represented as a tree of addressable resources, where each node in the tree (aka resource) offers a set of operations to execute.
+
+An operation request basically consists of three parts: the address, an operation name and an optional set of parameters.
+
+```python
+host = '172.32.1.32'
+address = [{'host': host},
+           {'server': '{}-0'.format(host)},
+           {'subsystem': 'logging'}]
+parameters = {'name': 'server.log', 'tail': 'true', 'lines': '100'}
+response = client.execute('read-log-file', parameters, address)
+```
+
 **Parameters**:
 
 Name | Type | Default | Description
