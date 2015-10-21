@@ -67,33 +67,45 @@ class Wildfly:
 
     response = self.execute('remove', address=address)
     return response
+
+  def read_resource(self, address=[], recursive=False, recursive_depth=10,
+                    runtime=False, include_defaults=True, attributes_only=False):
+    """ Reads a resource's attribute values along with either
+        basic or complete information about any child resources. """
     
+    response = self.execute('read-resource',
+                            {'recursive': recursive,
+                             'recursive_depth': recursive_depth,
+                             'runtime': runtime,
+                             'include_defaults': include_defaults,
+                             'attributes_only': attributes_only},
+                            address)
+    return response
+  
   def read_attribute(self, name, address=[], include_defaults=True):
     """ Read attribute of resource. """
 
-    request = {'address': address, 'operation': 'read-attribute',
-               'name': name, 'include-defaults': include_defaults}
-    response = self._post(request)
+    response = self.execute('read-attribute',
+                            {'name': name, 'include-defaults': include_defaults},
+                            address)
     return response.json()['result']
 
   def write_attribute(self, name, value, address=[]):
     """ Write value of attribute of resource. """
 
-    request = {'address': address, 'operation': 'write-attribute',
-               'name': name, 'value': value}
-    response = self._post(request)
+    response = self.execute('write-attribute',
+                            {'name': name, 'value': value},
+                            address)
     return response
   
   def read_children_names(self, child_type, address=[]):
     """ Returns a list of the names of all child resources of a given type. """
 
-    request = {'address': address, 'operation': 'read-children-names',
-               'child-type': child_type}
-    response = self._post(request)
+    response = self.execute('read-children-names',
+                            {'child-type': child_type},
+                            address)
     return response.json()['result']
-    
-  # read-resource
-  
+      
   def version(self):
     """ Prints version of WildFly. """
     
@@ -132,7 +144,8 @@ class Wildfly:
   def deploy(self, groupId, artifactId, version, type='war', server_groups='A',
              path=None, enabled=True,
              nexus_host='nexus.cenx.localnet', nexus_port='8081'):
-
+    """ Deploy artifact to WildFly. """
+    
     # TODO support new deploy and redeploy
     # TODO if deploy fails then show tail of logs
     # TODO if deploy fails then rollback to previous
@@ -176,7 +189,6 @@ class Wildfly:
     """ Displays information about deployments. """
 
     # name, runtime_name, enabled, status
-    # request = {'operation': 'read-children-names', 'child-type': 'deployment')
     response = self.execute('read-children-resources', {'child-type': 'deployment'})
     result = response.json()['result']
     artifacts = {}
@@ -185,7 +197,8 @@ class Wildfly:
     return artifacts
       
   def undeploy(self, artifactId, type='war', server_groups='A'):
-
+    """ Undeploy artifact from WildFly. """
+    
     # remove artifact from server-group(s)
     address = [{'server-group': server_groups},
                {'deployment': "{}.{}".format(artifactId, type)}]

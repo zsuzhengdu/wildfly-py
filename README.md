@@ -6,7 +6,9 @@ This package provides Python binding for the WildFly Management API.
 Installation
 ------------
 
-You can install from source.
+_When the wildfly-py package is more stable it will be available on PyPi._
+
+You can install development version from GitHub.
 
 ```bash
 pip install  git+git://github.com/cenx-cf/wildfly-py

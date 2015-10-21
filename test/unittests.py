@@ -69,6 +69,34 @@ class ExecuteTest(unittest.TestCase):
     self.wildfly.execute(operation=operation, address=address)
 
 
+class AddTest(unittest.TestCase):
+
+  def test_add(self):
+    self.fail()
+
+    
+class RemoveTest(unittest.TestCase):
+
+  def test_remove(self):
+    self.fail()
+
+    
+class ReadResourceTest(unittest.TestCase):
+
+  wildfly = None
+    
+  def setUp(self):
+    wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
+    self.wildfly = Wildfly(wildfly_host)
+    
+  def tearDown(self):
+    self.wildfly.disconnect()
+
+  def test_read_resource(self):
+    result = self.wildfly.read_resource([])
+    self.assertEqual(result.json()['outcome'], 'success')
+
+    
 class ReadAttributeTest(unittest.TestCase):
 
   wildfly = None
@@ -237,13 +265,14 @@ class UndeployTest(unittest.TestCase):
 class DeploymentInfoTest(unittest.TestCase):
 
   wildfly = None
+  groupId = 'org.jboss.mod_cluster'
   artifactId = 'mod_cluster-demo-server'
+  version = '1.2.6.Final'
     
   def setUp(self):
     wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
     self.wildfly = Wildfly(wildfly_host)
-    self.wildfly.deploy('org.jboss.mod_cluster', 'mod_cluster-demo-server',
-                        '1.2.6.Final', 'A')
+    self.wildfly.deploy(self.groupId, self.artifactId, self.version)
 
   def tearDown(self):
     self.wildfly.undeploy('mod_cluster-demo-server')
@@ -252,7 +281,8 @@ class DeploymentInfoTest(unittest.TestCase):
   def test_deployment_info(self):
 
     info = self.wildfly.deployment_info()
-    expected = {'mod_cluster-demo-server.war': {'runtime-name': 'mod_cluster-demo-server.war'}}
+    expected = {'{}.war'.format(self.artifactId):
+                {'runtime-name': '{}.war'.format(self.artifactId)}}
     self.assertEqual(info, expected)
     
     
