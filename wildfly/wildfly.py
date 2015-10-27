@@ -4,6 +4,12 @@ import requests
 from requests.auth import HTTPDigestAuth
 import json
 import logging
+import errno
+import os
+
+
+DEFAULT_NEXUS_HOST = 'nexus.cenx.localnet'
+DEFAULT_NEXUS_PORT = '8081'
 
 # setup logging
 logger = logging.getLogger(__name__)
@@ -19,7 +25,7 @@ class Wildfly:
   DEFAULT_MANAGEMENT_PORT = '9990'
   DEFAULT_MANAGEMENT_USER = 'admin'
   DEFAULT_MANAGEMENT_PWD = 'admin'
-
+  
   def __init__(self, host, port=DEFAULT_MANAGEMENT_PORT,
                username=DEFAULT_MANAGEMENT_USER, password=DEFAULT_MANAGEMENT_PWD, timeout=5000):
 
@@ -136,21 +142,20 @@ class Wildfly:
     return self._server_operation('restart-servers', server_group, blocking)
 
   def pull(self, groupId, artifactId, version, type='war', server_groups='A',
-           path=None, nexus_host='nexus.cenx.localnet', nexus_port='8081'):
+           path=None, nexus_host=DEFAULT_NEXUS_HOST, nexus_port=DEFAULT_NEXUS_PORT):
     """ Pull artifact from artifact repository into wildfly content repository. """
     
     self.deploy(groupId, artifactId, version, type, server_groups,
-                path, enabled=False, nexus_host=nexus_host, nexus_port=nexus_port)
+                path, enabled=False,
+                nexus_host=nexus_host, nexus_port=nexus_port)
     
   def deploy(self, groupId, artifactId, version, type='war', server_groups='A',
-             path=None, enabled=True,
-             nexus_host='nexus.cenx.localnet', nexus_port='8081'):
+             path=None, enabled=True, force=True,
+             nexus_host=DEFAULT_NEXUS_HOST, nexus_port=DEFAULT_NEXUS_PORT):
     """ Deploy artifact to WildFly. """
-    
-    # TODO support new deploy and redeploy
-    # TODO if deploy fails then show tail of logs
-    # TODO if deploy fails then rollback to previous
 
+    # TODO need to handle SNAPSHOT versions
+    
     if path is None:
       
       NEXUS_BASE_URL = 'http://{}:{}/nexus' \
@@ -159,11 +164,20 @@ class Wildfly:
       url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(NEXUS_BASE_URL,
                                                  groupId.replace('.', '/'),
                                                  artifactId, version, type)
+
+      # check if url exists
+      response = requests.head(url)
+      if response.status_code is not 200:
+        response.raise_for_status()
       
       # upload artifact from url to content repository
       response = self.execute('upload-deployment-url', {'url': url})
 
     else:
+
+      # check if file exists
+      if not os.path.isfile(path):
+        raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), path)
       
       # upload artifact from local file path to content repository
       files = {'file': open(path, 'rb')}
@@ -172,6 +186,13 @@ class Wildfly:
       logger.debug('Response Status Code: {}: {}'.format(response.status_code, response.reason))
       logger.debug('Response: {}'.format(response.json()))
 
+    # TODO support new deploy and redeploy
+    # TODO if deploy fails then rollback to previous
+    # if force:
+    # if isDeploymentInRepository("{}.{}".format(artifactId, type)):
+    # replaceDeployment(ctx, f, deploymentUrl, name, runtimeName, disabled)
+    # return
+    
     # add artifact to content repository
     byte_value = response.json()['result']['BYTES_VALUE']
     request = {"content": [{"hash": {"BYTES_VALUE": byte_value}}],

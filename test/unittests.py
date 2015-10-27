@@ -1,16 +1,22 @@
 #!/usr/bin/env python
 
 import os
+import errno
 import unittest
+import wildfly
 from wildfly import Wildfly
+import requests
 from requests import HTTPError
 
+
+DEFAULT_NEXUS_HOST = 'nexus.cenx.localnet'
+DEFAULT_NEXUS_PORT = '8081'
 
 DEFAULT_GROUP_ID = 'org.jboss.mod_cluster'
 DEFAULT_ARTIFACT_ID = 'mod_cluster-demo-server'
 DEFAULT_ARTIFACT_VERSION = '1.2.6.Final'
 
-wildfly = None
+client = None
 
 
 def suite():
@@ -33,49 +39,48 @@ def suite():
 
 
 def create_wildfly_service(mode='domain'):
-  # use docker-py to create wildfly service fixture
+  # use docker-py to create wildfly service (container) fixture
   pass
 
   
 def remove_wildfly_service(mode='domain'):
-  # use docker-py to remove wildfly service fixture
+  # use docker-py to remove wildfly service (container) fixture
   pass
 
 
 def setUpModule():
   create_wildfly_service()
+  global client
   wildfly_host = os.environ['DOCKER_HOST'].split(':')[1].replace('//', '')
-  global wildfly
-  wildfly = Wildfly(wildfly_host)
+  client = Wildfly(wildfly_host)
 
   
 def tearDownModule():
-  global wildfly
-  wildfly.disconnect()
+  global client
+  client.disconnect()
   remove_wildfly_service()
     
     
 class ExecuteTest(unittest.TestCase):
 
-  global wildfly
+  global client
   
   def test_execute_parms(self):
     operation = 'read-children-resources'
     parameters = {'child-type': 'host', 'include-runtime': 'true'}
-    wildfly.execute(operation=operation, parameters=parameters)
+    client.execute(operation=operation, parameters=parameters)
 
   def test_execute_defaults(self):
     operation = 'read-resource'
-    wildfly.execute(operation=operation)
+    client.execute(operation=operation)
 
   def test_execute_address(self):
     operation = 'read-resource'
     address = [{'server-group': 'A'}]
-    wildfly.execute(operation=operation, address=address)
+    client.execute(operation=operation, address=address)
 
 
 class AddTest(unittest.TestCase):
-
   def test_add(self):
     self.fail()
 
@@ -88,49 +93,52 @@ class RemoveTest(unittest.TestCase):
     
 class ReadResourceTest(unittest.TestCase):
 
-  global wildfly
+  global client
 
   def test_read_resource(self):
-    result = wildfly.read_resource([])
+    result = client.read_resource([])
     self.assertEqual(result.json()['outcome'], 'success')
 
     
 class ReadAttributeTest(unittest.TestCase):
 
-  global wildfly
+  global client
     
   def test_read_attribute(self):
-    result = wildfly.read_attribute(address=[], name='process-type')
+    result = client.read_attribute(address=[], name='process-type')
     self.assertEqual(result, 'Domain Controller')
 
     
 class WriteAttributeTest(unittest.TestCase):
 
-  global wildfly
+  global client
 
-  def test_read_attribute(self):
-    result = wildfly.read_attribute(address=[], name='process-type')
-    self.assertEqual(result, 'Domain Controller')
+  def test_write_attribute(self):
+    current_value = client.read_attribute(address=[], name='name')
+    result = client.write_attribute(address=[], name='name', value='test')
+    result = client.read_attribute(address=[], name='name')
+    self.assertEqual(result, 'test')
+    client.write_attribute(address=[], name='name', value=current_value)
 
     
 class ReadChildrenNamesTest(unittest.TestCase):
 
-  global wildfly
+  global client
     
   def test_read_children_names(self):
-    result = wildfly.read_children_names(address=[], child_type='server-group')
+    result = client.read_children_names(address=[], child_type='server-group')
     self.assertIsNotNone(result)
     self.assertEquals(result[0], 'A')
 
     
 class VersionTest(unittest.TestCase):
 
-  global wildfly
+  global client
   
   def test_version(self):
 
     try:
-      result = wildfly.version()
+      result = client.version()
     except Exception as e:
       self.fail('version raised exception unexpectedly! Exception: {}.'.format(e))
     self.assertEqual(result, '8.2.0.Final')
@@ -138,75 +146,132 @@ class VersionTest(unittest.TestCase):
 
 class PullTest(unittest.TestCase):
 
-  global wildfly
+  global client
     
   def test_pull(self):
 
-    wildfly.pull(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION)
-    wildfly.undeploy(DEFAULT_ARTIFACT_ID)
+    client.pull(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION)
+    client.undeploy(DEFAULT_ARTIFACT_ID)
 
     
 class DeployTest(unittest.TestCase):
 
-  global wildfly
+  global client
     
   def test_deploy_url(self):
 
     try:
-      wildfly.deploy(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION)
+      client.deploy(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION)
     except Exception as e:
       self.fail('deploy raised exception unexpectedly! Exception: {}.'.format(e))
       
-    result = wildfly.read_attribute('enabled',
-                                    [{'server-group': 'A'},
-                                     {'deployment': '{}.war'.format(DEFAULT_ARTIFACT_ID)}])
+    result = client.read_attribute('enabled',
+                                   [{'server-group': 'A'},
+                                    {'deployment': '{}.war'.format(DEFAULT_ARTIFACT_ID)}])
     self.assertTrue(result)
-    wildfly.undeploy(DEFAULT_ARTIFACT_ID)
+    client.undeploy(DEFAULT_ARTIFACT_ID)
 
   def test_deploy_file(self):
 
+    NEXUS_BASE_URL = 'http://{}:{}/nexus' \
+                     '/service/local/repo_groups/public/content'.format(DEFAULT_NEXUS_HOST,
+                                                                        DEFAULT_NEXUS_PORT)
+    url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(NEXUS_BASE_URL,
+                                               DEFAULT_GROUP_ID.replace('.', '/'),
+                                               DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION,
+                                               'war')
+    response = requests.get(url)
+          
+    if response.status_code not in [200, 204]:
+      print('Response Status Code: {}: {}'.format(response.status_code, response.reason))
+      response.raise_for_status()
+
+    with open("{}-{}.war".format(DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION), "wb") as artifact:
+      artifact.write(response.content)
+    
     try:
-      wildfly.deploy(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION,
-                     path='/transport/{}-{}.war'.format(DEFAULT_ARTIFACT_ID,
-                                                        DEFAULT_ARTIFACT_VERSION))
+      client.deploy(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION,
+                    path='{}-{}.war'.format(DEFAULT_ARTIFACT_ID,
+                                            DEFAULT_ARTIFACT_VERSION))
     except Exception as e:
       self.fail('deploy raised exception unexpectedly! Exception: {}.'.format(e))
       
-    result = wildfly.read_attribute('enabled',
-                                    [{'server-group': 'A'},
-                                     {'deployment': '{}.war'.format(DEFAULT_ARTIFACT_ID)}])
+    result = client.read_attribute('enabled',
+                                   [{'server-group': 'A'},
+                                    {'deployment': '{}.war'.format(DEFAULT_ARTIFACT_ID)}])
     self.assertTrue(result)
-    wildfly.undeploy(DEFAULT_ARTIFACT_ID)
+    client.undeploy(DEFAULT_ARTIFACT_ID)
+    os.remove("{}-{}.war".format(DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION))
 
+  def test_deploy_file_not_exist(self):
+
+    with self.assertRaises(IOError) as cm:
+      client.deploy(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION,
+                    path='no-file-at-path')
+    exception = cm.exception
+    self.assertEqual(exception.errno, errno.ENOENT)
+    self.assertEqual(exception.strerror, os.strerror(exception.errno))
+
+  def test_deploy_url_not_exist(self):
+
+    with self.assertRaisesRegexp(HTTPError, "Not Found for url"):
+      client.deploy('fake', 'fake', 'fake')
+
+  @unittest.skip("still working on this one")
+  def test_redeploy_url(self):
+
+    pass
+    try:
+      client.deploy(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION)
+    except Exception as e:
+      self.fail('deploy raised exception unexpectedly! Exception: {}.'.format(e))
+      
+    result = client.read_attribute('enabled',
+                                   [{'server-group': 'A'},
+                                    {'deployment': '{}.war'.format(DEFAULT_ARTIFACT_ID)}])
+    self.assertTrue(result)
+
+    try:
+      client.deploy(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION)
+    except Exception as e:
+      self.fail('deploy raised exception unexpectedly! Exception: {}.'.format(e))
+      
+    result = client.read_attribute('enabled',
+                                   [{'server-group': 'A'},
+                                    {'deployment': '{}.war'.format(DEFAULT_ARTIFACT_ID)}])
+    self.assertTrue(result)
+
+    client.undeploy(DEFAULT_ARTIFACT_ID)
+    
     
 class UndeployTest(unittest.TestCase):
 
-  global wildfly
+  global client
     
   def test_undeploy(self):
 
-    wildfly.deploy(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION)
-    wildfly.undeploy(DEFAULT_ARTIFACT_ID)
+    client.deploy(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION)
+    client.undeploy(DEFAULT_ARTIFACT_ID)
 
   def test_undeploy_not_deployed(self):
 
     with self.assertRaises(HTTPError):
-      wildfly.undeploy(DEFAULT_ARTIFACT_ID)
+      client.undeploy(DEFAULT_ARTIFACT_ID)
 
     
 class DeploymentInfoTest(unittest.TestCase):
 
-  global wildfly
+  global client
     
   def setUp(self):
-    wildfly.deploy(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION)
+    client.deploy(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION)
 
   def tearDown(self):
-    wildfly.undeploy('mod_cluster-demo-server')
+    client.undeploy('mod_cluster-demo-server')
     
   def test_deployment_info(self):
 
-    info = wildfly.deployment_info()
+    info = client.deployment_info()
     expected = {'{}.war'.format(DEFAULT_ARTIFACT_ID):
                 {'runtime-name': '{}.war'.format(DEFAULT_ARTIFACT_ID)}}
     self.assertEqual(info, expected)
@@ -214,74 +279,74 @@ class DeploymentInfoTest(unittest.TestCase):
     
 class StartServersTest(unittest.TestCase):
 
-  global wildfly
+  global client
     
   def test_start_servers(self):
-    wildfly.start_servers(blocking=True)
-    # self.wildfly.server_info()
+    client.start_servers(blocking=True)
+    # self.client.server_info()
     # TODO assert that all servers are started
     # /host=172.17.0.72/server=172.17.0.72-0:read-attribute(name=server-state) = running
     
   def test_start_server_group(self):
-    wildfly.start_servers(server_group='A', blocking=True)
+    client.start_servers(server_group='A', blocking=True)
     # TODO assert that servers in group started
 
     
 class StopServersTest(unittest.TestCase):
 
-  global wildfly
+  global client
     
   def test_stop_servers(self):
-    wildfly.stop_servers(blocking=True)
+    client.stop_servers(blocking=True)
     # TODO assert that all servers are stopped
-    wildfly.execute('read-children-resources',
+    client.execute('read-children-resources',
                     {'child-type': 'host', 'include-runtime': 'true'})
     # /host=172.17.0.72:read-children-resources(child-type=server, include-runtime=true)
     # /host=172.17.0.72/server=172.17.0.72-0:read-attribute(name=server-state) = STOPPED
     # /host=172.17.0.72:read-children-resources(child-type=server-config, include-runtime=true)
     # /host=172.17.0.72/server-config=172.17.0.72-0:read-attribute(name=status) = STOPPED
     # /host=172.17.0.72/server-config=172.17.0.72-0:read-attribute(name=group)
-    wildfly.start_servers(blocking=True)
+    client.start_servers(blocking=True)
 
   def test_stop_server_group(self):
-    wildfly.stop_servers(server_group='A', blocking=True)
+    client.stop_servers(server_group='A', blocking=True)
     # TODO assert that all servers are stopped
-    wildfly.start_servers(server_group='A', blocking=True)
+    client.start_servers(server_group='A', blocking=True)
 
     
 class ReloadServersTest(unittest.TestCase):
 
-  global wildfly
+  global client
     
   def test_reload_servers(self):
-    wildfly.reload_servers(blocking=True)
+    client.reload_servers(blocking=True)
     # TODO assert that all servers are reloaded
 
   def test_reload_server_group(self):
-    wildfly.reload_servers(server_group='A', blocking=True)
+    client.reload_servers(server_group='A', blocking=True)
     # TODO assert that all servers are reloaded
 
     
 class RestartServersTest(unittest.TestCase):
 
-  global wildfly
+  global client
     
   def test_restart_servers(self):
-    wildfly.restart_servers(blocking=True)
+    client.restart_servers(blocking=True)
     # TODO assert that all servers are restarted
 
   def test_restart_server_group(self):
-    wildfly.restart_servers(server_group='A', blocking=True)
+    client.restart_servers(server_group='A', blocking=True)
     # TODO assert that all servers in group are restarted
 
     
 class ReadLogFileTest(unittest.TestCase):
 
-  global wildfly
+  global client
     
   def test_log_file(self):
 
-    logs = wildfly.read_log_file()
+    logs = client.read_log_file()
     self.assertIsNotNone(logs)
 
     

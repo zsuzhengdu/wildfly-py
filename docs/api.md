@@ -7,7 +7,7 @@ from wildfly import Wildfly
 client = Wildfly(host='localhost')
 ```
 
-**Params**:
+**Parameters**:
 
 Name | Type | Default | Description
 --- | --- | --- | ---
