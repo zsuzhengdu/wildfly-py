@@ -9,16 +9,15 @@ FROM fedora:22
 MAINTAINER CENX "cenx.com"
 
 # install required packages
-#RUN easy_install pip
-#RUN wget  https://bootstrap.pypa.io/get-pip.py
-#RUN python get-pip.py
 RUN /usr/bin/dnf install -y git python-pip python-crypto gcc python-devel && \
     pip install --upgrade pip
 
-ADD . /code
-WORKDIR /code
-RUN pip install -r requirements.txt
+ADD . /home/wildfly-py
+WORKDIR /home/wildfly-py
+
+# install required packages
+RUN pip install -r dev-requirements.txt
+
 # Deploy the project source in “Development Mode”
 #RUN pip install --editable .
-#xRUN pip install .
-#ENTRYPOINT ["/usr/bin/wildfly-py"]
+RUN pip install .

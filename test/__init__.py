@@ -1,5 +1,4 @@
 import logging
-from .client import Client # flake8: noqa
 
 # setup log stream handler
 ch = logging.StreamHandler()
@@ -9,6 +8,6 @@ ch.setFormatter(formatter)
 
 # setup package logger
 logger = logging.getLogger(__name__)
-#logger.setLevel(logging.INFO)
+# logger.setLevel(logging.INFO)
 logger.addHandler(ch)
 
