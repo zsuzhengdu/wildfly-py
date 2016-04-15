@@ -79,7 +79,7 @@ class DeploymentTest(base.BaseTestCase):
   def test_list_deployments_in_group(self):
     try:
       self.client.deploy(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION)
-      deployments = self.client.deployments(server_group=DEFAULT_SERVER_GROUP)
+      deployments = self.client.deployments(group=DEFAULT_SERVER_GROUP)
     except Exception as e:
       self.fail(base.UNEXPECTED_EXCEPTION_FORMAT.format(e))
     finally:
