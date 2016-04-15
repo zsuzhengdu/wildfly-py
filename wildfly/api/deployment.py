@@ -16,7 +16,7 @@ logger.setLevel(logging.INFO)
 
 class DeploymentApiMixin(object):
 
-  def deployments(self, server_group=None):
+  def deployments(self, group=None, host=None):
     """ Returns information about deployments. """
 
     # status['RUNNING', 'STOPPED', 'FAILED']
@@ -25,6 +25,7 @@ class DeploymentApiMixin(object):
       deployments[key]['server-groups'] = []
       deployments[key]['enabled'] = False
       deployments[key]['status'] = 'STOPPED'
+      deployments[key]['hosts'] = []
 
     server_groups = self.server_groups()
     for server_group in server_groups:
@@ -37,7 +38,7 @@ class DeploymentApiMixin(object):
           deployments[key]['server-groups'].append(server_group)
         else:
           deployments[key]['server-groups'] = [server_group]
-      
+
     servers = self.servers()
     for server in servers:
       if servers[server]['status'] != 'STOPPED':
@@ -47,12 +48,24 @@ class DeploymentApiMixin(object):
                                                              runtime=True)
         logger.debug('DEPLOYMENTS_ON_SERVER({}): {}'.format(server, deployments_on_server))
         for key in deployments_on_server:
-          status = deployments_on_server[key]['status']
-          if status == 'OK':
+          if deployments_on_server[key]['status'] == 'OK':
             deployments[key]['status'] = 'RUNNING'
+          deployments[key]['hosts'].append(servers[server]['host'])
+
+    if group:
+      logger.info('server group info provided: {}'.format(group))
+      for key in deployments.keys():
+        if group not in deployments[key]['server-groups']:
+          del deployments[key]
+
+    if host:
+      logger.info('host info provided: {}'.format(host))
+      for key in deployments.keys():
+        if host not in deployments[key]['hosts']:
+          del deployments[key]
 
     return deployments
-    
+
   def is_deployment_in_repository(self, name):
     """ Check if deployment exists in content repository. """
     return name in self.deployments()
