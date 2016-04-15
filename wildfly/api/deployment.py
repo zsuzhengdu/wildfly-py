@@ -53,13 +53,11 @@ class DeploymentApiMixin(object):
           deployments[key]['hosts'].append(servers[server]['host'])
 
     if group:
-      logger.info('server group info provided: {}'.format(group))
       for key in deployments.keys():
         if group not in deployments[key]['server-groups']:
           del deployments[key]
 
     if host:
-      logger.info('host info provided: {}'.format(host))
       for key in deployments.keys():
         if host not in deployments[key]['hosts']:
           del deployments[key]

@@ -20,7 +20,7 @@ class Client(requests.Session,
   DEFAULT_MANAGEMENT_USER = 'admin'
   DEFAULT_MANAGEMENT_PWD = 'admin'
   DEFAULT_TIMEOUT = 5000
-  
+
   def __init__(self, host, port=DEFAULT_MANAGEMENT_PORT,
                username=DEFAULT_MANAGEMENT_USER, password=DEFAULT_MANAGEMENT_PWD,
                timeout=DEFAULT_TIMEOUT):
@@ -164,4 +164,3 @@ class Client(requests.Session,
     
     result = self.read_attribute('release-version')
     return result
-    

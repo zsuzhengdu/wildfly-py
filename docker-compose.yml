@@ -40,6 +40,3 @@ wildfly-cli:
   links:
     - wildfly
   command: /opt/wildfly/bin/jboss-cli.sh --controller=wildfly-py-fixture:9990 --connect --user=admin --password=admin
-    
-    
-    
