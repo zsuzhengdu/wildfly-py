@@ -13,8 +13,6 @@ logger.setLevel(logging.INFO)
 
 DEFAULT_NEXUS_HOST = 'nexus.cenx.localnet'
 DEFAULT_NEXUS_PORT = '8081'
-
-DEFAULT_GROUP = 'A'
 DEFAULT_GROUP_ID = 'org.jboss.mod_cluster'
 DEFAULT_ARTIFACT_ID = 'mod_cluster-demo-server'
 DEFAULT_ARTIFACT_VERSION = '1.2.6.Final'
@@ -27,9 +25,9 @@ class DeploymentTest(base.BaseTestCase):
   def test_deployments_with_opitions(self):
     try:
       self.client.deploy(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION)
-      deployments = self.client.deployments(group=DEFAULT_GROUP)
+      deployments = self.client.deployments(server_group=DEFAULT_SERVER_GROUP)
       for key in deployments.keys():
-        self.assertIn(DEFAULT_GROUP, deployments[key]['server-groups'])
+        self.assertIn(DEFAULT_SERVER_GROUP, deployments[key]['server-groups'])
     except Exception as e:
       self.fail(base.UNEXPECTED_EXCEPTION_FORMAT.format(e))
     finally:
