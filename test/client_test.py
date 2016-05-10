@@ -69,7 +69,7 @@ class ExecuteTest(base.BaseTestCase):
   def test_execute_controller_bad_address(self):
     client = wildfly.Client('invalidaddress')
     operation = 'read-resource'
-    with self.assertRaisesRegexp(requests.ConnectionError, 'No address associated with hostname'):
+    with self.assertRaisesRegexp(requests.ConnectionError, 'Name or service not known'):
       client.execute(operation=operation)
     client.close()
 
