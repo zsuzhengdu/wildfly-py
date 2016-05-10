@@ -237,3 +237,22 @@ class UndeployTest(base.BaseTestCase):
     self.assertFalse(wildfly.util.is_success(response))
     failure_description = response.json()['failure-description']['domain-failure-description']
     self.assertIn('not found', failure_description)
+
+
+class EnableDisableTest(base.BaseTestCase):
+
+  def test_enable(self):
+    try:
+      self.client.pull(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION)
+      self.client.enable(DEFAULT_DEPLOYMENT_NAME, DEFAULT_SERVER_GROUP)
+      self.assertTrue(self.client.is_deployment_enabled(DEFAULT_DEPLOYMENT_NAME))
+    finally:
+      self.client.undeploy(DEFAULT_DEPLOYMENT_NAME)
+
+  def test_disable(self):
+    try:
+      self.client.deploy(DEFAULT_GROUP_ID, DEFAULT_ARTIFACT_ID, DEFAULT_ARTIFACT_VERSION)
+      self.client.disable(DEFAULT_DEPLOYMENT_NAME, DEFAULT_SERVER_GROUP)
+      self.assertFalse(self.client.is_deployment_enabled(DEFAULT_DEPLOYMENT_NAME))
+    finally:
+      self.client.undeploy(DEFAULT_DEPLOYMENT_NAME)

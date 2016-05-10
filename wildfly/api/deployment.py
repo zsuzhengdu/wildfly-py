@@ -140,7 +140,25 @@ class DeploymentApiMixin(object):
     address = [{'server-group': server_groups},
                {'deployment': '{}.{}'.format(artifactId, type)}]
     response = self.add(address, {'enabled': enabled})
-      
+
+  def disable(self, name, server_groups=DEFAULT_SERVER_GROUP):
+    """ Disable artifact in given server_groups, but keep artifact in assigned server_groups. """
+    address = [{'server-group': server_groups},
+               {'deployment': name}]
+
+    response = self.execute('undeploy', address=address)
+    if not util.is_success(response):
+      logging.debug("Failed to disable artifact: {}".format(name))
+
+  def enable(self, name, server_groups=DEFAULT_SERVER_GROUP):
+    """ Enable artifact in given server_groups. """
+    address = [{'server-group': server_groups},
+               {'deployment': name}]
+
+    response = self.execute('deploy', address=address)
+    if not util.is_success(response):
+      logging.debug("Failed to enable artifact: {}".format(name))
+
   def undeploy(self, name, server_groups=DEFAULT_SERVER_GROUP):
     """ Undeploy artifact from WildFly. """
     

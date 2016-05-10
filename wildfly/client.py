@@ -56,7 +56,6 @@ class Client(requests.Session,
     request = {'address': address, 'operation': operation}
     request.update(parameters)
     response = self._post(request)
-    #return None
     return response
   
   def add(self, address, parameters=None):
