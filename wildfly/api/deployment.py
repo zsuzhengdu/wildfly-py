@@ -128,17 +128,23 @@ class DeploymentApiMixin(object):
     # if isDeploymentInRepository("{}.{}".format(artifactId, type)):
     # replaceDeployment(ctx, f, deploymentUrl, name, runtimeName, disabled)
     # return
-    
+
+    # https://github.com/cenx-cf/wildfly-py/issues/5
+    if type == 'war':
+      runtime_name = artifactId + '-' + version + '.' + type
+    elif type == 'jar':
+      runtime_name = artifactId.split('-')[-2] + '-resources' + '.' + type
+
     # add artifact to content repository
     byte_value = response.json()['result']['BYTES_VALUE']
     request = {"content": [{"hash": {"BYTES_VALUE": byte_value}}],
-               "address": [{"deployment": "{}.{}".format(artifactId, type)}],
+               "address": [{"deployment": "{}".format(runtime_name)}],
                "operation": "add"}
     response = self._post(request)
  
     # add artifact to server-group(s)
     address = [{'server-group': server_groups},
-               {'deployment': '{}.{}'.format(artifactId, type)}]
+               {'deployment': '{}'.format(runtime_name)}]
     response = self.add(address, {'enabled': enabled})
 
   def disable(self, name, server_groups=DEFAULT_SERVER_GROUP):

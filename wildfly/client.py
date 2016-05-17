@@ -42,9 +42,7 @@ class Client(requests.Session,
     if response.status_code in [200, 204]:
       logger.debug('Response Status Code: {}: {}'.format(response.status_code, response.reason))
     elif response.status_code == 500:
-      failure = response.json()['failure-description']['domain-failure-description']
-      logger.debug('Response Status Code: {}: {} ({})'.format(response.status_code,
-                                                              response.reason, failure))
+      logger.debug('Response Status Code: {}: {}'.format(response.status_code, response.json()))
     else:
       response.raise_for_status()
     logger.debug('Response: {}'.format(response.json()))
