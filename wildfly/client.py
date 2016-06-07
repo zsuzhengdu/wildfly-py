@@ -120,7 +120,7 @@ class Client(requests.Session,
     response = self.execute('read-children-names',
                             {'child-type': child_type},
                             address)
-  return response.json()['result']  if util.is_success(response) else None
+    return response.json()['result'] if util.is_success(response) else None
 
   def read_children_resources(self, child_type, address=[], runtime=False):
     """ Returns a list of the resources of all child resources of a given type. """
