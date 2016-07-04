@@ -1,8 +1,8 @@
 # python binding for wildlfy management http/json api
-
 import logging
 import json
 import requests
+
 from . import util
 from . import api
 
@@ -195,7 +195,7 @@ class Client(requests.Session,
 
         if server_group:
             item = ret_value.get(server_group, [])
-            ret_value = {server_group: item }
+            ret_value = {server_group: item}
         logger.debug("Results = {result}".format(result=ret_value))
         return ret_value
 
@@ -243,21 +243,21 @@ class Client(requests.Session,
                                                                                                 sg=val))
         return val
 
-    def get_hostname(self, host, server_name):
+    def get_hostname(self, host, svr_name):
         """
         Returns the fully qualified host nanme associated with a given WF host and WF server.  Runs the equivalent WF
         CLI command:   /host=<host>/server=<server>/core-service=server-environment:read_attribute(name=qualified-host-name,include-defaults=true)
         :param host  The WildFly host
-        :param server_name  The WildFly server
+        :param svr_name  The WildFly server
         :return The associated qualified host name
         """
         logger.debug("Retrieving qualified hostname for host '{host}' and server '{server}'...".format(host=host,
-                                                                                                    server=server_name))
-        address = [{'host': host}, {'server': server_name}, {'core-service': 'server-environment'}]
+                                                                                                       server=svr_name))
+        address = [{'host': host}, {'server': svr_name}, {'core-service': 'server-environment'}]
         val = self.read_attribute('qualified-host-name', address, include_defaults=True)
         logger.info("WildFly host {wfhost} and server {server} has a hostname of {host}".format(wfhost=host,
-                                                                                             server=server_name,
-                                                                                             host=val))
+                                                                                                server=svr_name,
+                                                                                                host=val))
         return val
 
     def _get_hostname_map(self):
@@ -300,9 +300,9 @@ class Client(requests.Session,
                     # Set the Server group and qualified_hostname
                     host_map[host][server_name][sg] = qualified_hostname
                     logger.info("WildFly host {wfhost} and server {server} has a ".format(wfhost=host,
-                                                                                       server=server_name,) +
-                             "server group {sg} and qualified_hostname of {host}".format(sg=sg,
-                                                                                         host=qualified_hostname,))
+                                                                                          server=server_name,) +
+                                "server group {sg} and qualified_hostname of {host}".format(sg=sg,
+                                                                                            host=qualified_hostname,))
                 except (SystemError, KeyError) as e:
                     # if an error occurs, the WF server may not have a server-group as it may be the data container
                     # Just log the error and "pass"
@@ -330,7 +330,7 @@ class Client(requests.Session,
                      for sg, hostname in self._hostname_map[wf_host][wf_server].items()
                      if server_group == sg]
         logger.info("Server Group {sg} is running on hostnames {hostnames}".format(sg=server_group,
-                                                                                hostnames=", ".join(hostnames)))
+                                                                                   hostnames=", ".join(hostnames)))
         return hostnames
 
     def get_application_hostnames(self, application, ext=None):
@@ -338,7 +338,7 @@ class Client(requests.Session,
         Get the hostname where an application is deployed
         :param application The application
         :param ext The application extension  e.g. war, jar
-        :return A list of hostnames where the application is running
+        :return A list of host names where the application is running
         """
 
         # Let's find the server groups that the apps is deployed against, because an app can be deployed to more than
@@ -351,9 +351,9 @@ class Client(requests.Session,
         sg_info = self.get_deployed_apps()
         server_groups = [sg for sg in sg_info for app in sg_info[sg] if application in app]
         logger.info("Application {app} is deployed in server-groups: {sg}".format(app=application,
-                                                                               sg=", ".join(server_groups)))
+                                                                                  sg=", ".join(server_groups)))
         hosts_list = set([host for sg in server_groups for host in self.get_server_group_host(sg)])
         logger.info("Application {app} is deployed on host names: {hosts}".format(app=application,
-                                                                               hosts=", ".join(hosts_list)))
+                                                                                  hosts=", ".join(hosts_list)))
 
         return hosts_list
