@@ -53,11 +53,11 @@ class Client(requests.Session,
                                  auth=requests.auth.HTTPDigestAuth(self.username, self.password),
                                  data=json.dumps(request))
         if response.status_code in [200, 204]:
-          logger.debug('Response Status Code: {}: {}'.format(response.status_code, response.reason))
+            logger.debug('Response Status Code: {}: {}'.format(response.status_code, response.reason))
         elif response.status_code == 500:
-          logger.debug('Response Status Code: {}: {}'.format(response.status_code, response.json()))
+            logger.debug('Response Status Code: {}: {}'.format(response.status_code, response.json()))
         else:
-          response.raise_for_status()
+            response.raise_for_status()
         logger.debug('Response: {}'.format(response.json()))
         return response
 
@@ -68,7 +68,7 @@ class Client(requests.Session,
         request.update(parameters)
         response = self._post(request)
         return response
-  
+
     def add(self, address, parameters=None):
         """ Creates a new management resource. """
 

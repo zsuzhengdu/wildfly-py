@@ -5,10 +5,10 @@
 from setuptools import setup, find_packages
 
 with open('README.md') as readme:
-  long_description = readme.read()
+    long_description = readme.read()
 
 with open('requirements.txt') as f:
-  requirements = [line.strip() for line in f.readlines()]
+    requirements = [line.strip() for line in f.readlines()]
 
 setup(name='wildfly-py',
       version='0.0.1',
@@ -30,4 +30,3 @@ setup(name='wildfly-py',
       license='Apache License 2.0',
       keywords='cenx wildfly',
       url='https://github.org/cenx-cf/wildfly-py')
-
