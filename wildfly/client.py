@@ -2,7 +2,6 @@
 
 import logging
 import json
-import os
 import requests
 from . import util
 from . import api
@@ -11,7 +10,6 @@ log_format = '%(asctime)s | %(levelname)7s | %(name)s | line:%(lineno)4s | %(mes
 logging.basicConfig(format=log_format, level=logging.DEBUG)
 
 logger = logging.getLogger(__name__)
-log = logger
 
 # Define some
 KEY_OUTCOME = "outcome"
@@ -185,53 +183,20 @@ class Client(requests.Session,
         :return a dictionary where the keys are the server group, and the value is a list of all applications running \
                 in the said server group
         """
-        more = "server group {sg}".format(sg=server_group) if server_group else "all server groups"
-        log.info("Getting a list of deployed apps for {more}.".format(more=more))
-        ret_value = {}  # Where the key represents the server group, and the value a list of apps deployed on said
-        # server group
-        # Let's get the raw server groups information as provided by WildFly.
-        data = self.get_raw_server_groups_info()
-
-        # Let's throw an exception if the "outcome" is not successful
-        status = data.get(KEY_OUTCOME, None)
-        if status != "success":
-            raise Exception("Something bad happened when trying to get a list of deployed apps.")
-
-        # We have good data, so let's massage the data to meet our needs
-        result = data.get(KEY_RESULT, [])
-        for sg_info in result:
-            # Results is a list, where each item is a dictionary. So let's confirm the outcome of each list item was
-            # successful
-            status = sg_info.get(KEY_OUTCOME, None)   # Get the status of the server-group retrieval.
-
-            # Let's find the server-group name
-            sg_name = None
-            sg_address = sg_info.get('address', None)
-            for item in sg_address:
-                # the value of address is a list of dictionary.
-                if 'server-group' in item:
-                    # We found the server group name.  I'm purposely not using the 'get' function so we can break out of
-                    # the loop when we find the server group name.
-                    sg_name = item['server-group']
-                    break
-
-            ret_value[sg_name] = []  # Default the list of applications to an empty list
-            if status != 'success':
-                log.info("Retrieving information for server-group {name} ".format(name=sg_name) +
-                         "was not successful (status: {status})".format(status=status))
-                continue
-
-            sg_result = sg_info.get(KEY_RESULT, {})
-            # Get all the deployed applications on the server group
-            if sg_result and 'deployment' in sg_result and sg_result['deployment'] is not None:
-                ret_value[sg_name] = [app for app in sg_result['deployment'].keys()]
+        deployed_apps = self.deployments(server_group)
+        # Let's parse the output of the deployed output so it's in a format we expect
+        ret_value = {}
+        for war, value in deployed_apps.items():
+            sgs = value.get('server-groups', [])
+            for sg in sgs:
+                if sg not in ret_value:
+                    ret_value[sg] = []
+                ret_value[sg].append(war)
 
         if server_group:
-            # We want the apps for only a specific server group.  So let's filter the list
-            log.info("Filtering App deployments for server group {sg}.".format(sg=server_group))
-            ret_value = {sg_name: app_list for sg_name, app_list in ret_value.items() if server_group == sg_name}
-
-        log.debug("Results = {result}".format(result=ret_value))
+            item = ret_value.get(server_group, [])
+            ret_value = {server_group: item }
+        logger.debug("Results = {result}".format(result=ret_value))
         return ret_value
 
     def get_server_name(self, host):
@@ -242,16 +207,16 @@ class Client(requests.Session,
         :param host  A Wildfly host as specified by the `ls /hosts` CLI command
         :return A string representing a WF Server name for the given WF host.
         """
-        log.info("Retrieving server name for host '{host}'.".format(host=host))
+        logger.info("Retrieving server name for host '{host}'.".format(host=host))
         address = [{'host': host}, {'server': '*'}]
         result = self.read_resource(address).json()
 
-        log.info("Retrieved server name for wf host {host}.  Response is {resp}".format(host=host, resp=result))
+        logger.info("Retrieved server name for wf host {host}.  Response is {resp}".format(host=host, resp=result))
         status = result.get(KEY_OUTCOME, None)
         if status != 'success':
             raise Exception("Something bad happened when trying th get servers of WF host {host}".format(host=host))
 
-        log.debug("Command is successful, processing response now...")
+        logger.debug("Command is successful, processing response now...")
         server = None
         if KEY_RESULT in result and result[KEY_RESULT]:
             for list_item in result[KEY_RESULT]:
@@ -269,13 +234,13 @@ class Client(requests.Session,
         :param server_name  The WildFly server
         :return The value of the server-group
         """
-        log.debug("Retrieving server-group for host '{host}' and server '{server}'...".format(host=host,
-                                                                                              server=server_name))
+        logger.debug("Retrieving server-group for host '{host}' and server '{server}'...".format(host=host,
+                                                                                                 server=server_name))
         address = [{'host': host}, {'server': server_name}]
         val = self.read_attribute('server-group', address, include_defaults=True)
-        log.info("WildFly host {host} and server {server} has a server-group of {sg}".format(host=host,
-                                                                                             server=server_name,
-                                                                                             sg=val))
+        logger.info("WildFly host {host} and server {server} has a server-group of {sg}".format(host=host,
+                                                                                                server=server_name,
+                                                                                                sg=val))
         return val
 
     def get_hostname(self, host, server_name):
@@ -286,11 +251,11 @@ class Client(requests.Session,
         :param server_name  The WildFly server
         :return The associated qualified host name
         """
-        log.debug("Retrieving qualified hostname for host '{host}' and server '{server}'...".format(host=host,
+        logger.debug("Retrieving qualified hostname for host '{host}' and server '{server}'...".format(host=host,
                                                                                                     server=server_name))
         address = [{'host': host}, {'server': server_name}, {'core-service': 'server-environment'}]
         val = self.read_attribute('qualified-host-name', address, include_defaults=True)
-        log.info("WildFly host {wfhost} and server {server} has a hostname of {host}".format(wfhost=host,
+        logger.info("WildFly host {wfhost} and server {server} has a hostname of {host}".format(wfhost=host,
                                                                                              server=server_name,
                                                                                              host=val))
         return val
@@ -311,17 +276,17 @@ class Client(requests.Session,
         :return a dictionary that has a mapping of the WF host, server and server group to a physically qualified domain
                 name
         """
-        log.debug("Generating Hostname map")
+        logger.debug("Generating Hostname map")
         host_map = {}
         for host in self.hosts():
-            log.debug("host is {host}".format(host=host))
+            logger.debug("host is {host}".format(host=host))
             if host not in host_map:
                 # Ensure we have the host key is in the host_map
                 host_map[host] = {}
             # Get the server name
             server_name = self.get_server_name(host)
 
-            log.debug("server name is {server}".format(server=server_name))
+            logger.debug("server name is {server}".format(server=server_name))
             if server_name not in host_map[host]:
                 # Ensure the server name is a key under the host
                 host_map[host][server_name] = {}
@@ -334,17 +299,17 @@ class Client(requests.Session,
 
                     # Set the Server group and qualified_hostname
                     host_map[host][server_name][sg] = qualified_hostname
-                    log.info("WildFly host {wfhost} and server {server} has a ".format(wfhost=host,
+                    logger.info("WildFly host {wfhost} and server {server} has a ".format(wfhost=host,
                                                                                        server=server_name,) +
                              "server group {sg} and qualified_hostname of {host}".format(sg=sg,
                                                                                          host=qualified_hostname,))
                 except (SystemError, KeyError) as e:
                     # if an error occurs, the WF server may not have a server-group as it may be the data container
                     # Just log the error and "pass"
-                    log.error("(NOT A BUG) A failure occurred: {err}".format(err=e))
+                    logger.error("(NOT A BUG) A failure occurred: {err}".format(err=e))
 
-        log.debug("done generating hostname map.")
-        log.info("The Hostname map is {map}".format(map=host_map))
+        logger.debug("done generating hostname map.")
+        logger.info("The Hostname map is {map}".format(map=host_map))
         return host_map
 
     def get_server_group_host(self, server_group):
@@ -358,13 +323,13 @@ class Client(requests.Session,
             # an empty dictionary
             self._hostname_map = self._get_hostname_map()
 
-        log.info("Getting server group {sg} hostname.".format(sg=server_group))
+        logger.info("Getting server group {sg} hostname.".format(sg=server_group))
         hostnames = [hostname
                      for wf_host in self._hostname_map
                      for wf_server in self._hostname_map[wf_host]
                      for sg, hostname in self._hostname_map[wf_host][wf_server].items()
                      if server_group == sg]
-        log.info("Server Group {sg} is running on hostnames {hostnames}".format(sg=server_group,
+        logger.info("Server Group {sg} is running on hostnames {hostnames}".format(sg=server_group,
                                                                                 hostnames=", ".join(hostnames)))
         return hostnames
 
@@ -381,14 +346,14 @@ class Client(requests.Session,
         if ext:
             application = ".".join([application, ext])
 
-        log.info("Getting hostnames where application {app} is running.".format(app=application))
+        logger.info("Getting hostnames where application {app} is running.".format(app=application))
         # Get a list of deployed all
         sg_info = self.get_deployed_apps()
         server_groups = [sg for sg in sg_info for app in sg_info[sg] if application in app]
-        log.info("Application {app} is deployed in server-groups: {sg}".format(app=application,
+        logger.info("Application {app} is deployed in server-groups: {sg}".format(app=application,
                                                                                sg=", ".join(server_groups)))
         hosts_list = set([host for sg in server_groups for host in self.get_server_group_host(sg)])
-        log.info("Application {app} is deployed on host names: {hosts}".format(app=application,
+        logger.info("Application {app} is deployed on host names: {hosts}".format(app=application,
                                                                                hosts=", ".join(hosts_list)))
 
         return hosts_list
