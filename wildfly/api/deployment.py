@@ -8,7 +8,6 @@ from .. import util
 DEFAULT_CONTENT_HOST = 'http://repo.maven.apache.org'
 DEFAULT_CONTENT_HOST_EP = 'maven2'
 DEFAULT_CONTENT_HOST_PORT = '80'
-DEFAULT_CONTENT_HOST_PROT = 'http'
 DEFAULT_SERVER_GROUP = 'A'
 DEFAULT_ARTIFACT_TYPE = 'war'
 
@@ -80,21 +79,19 @@ class DeploymentApiMixin(object):
   
   def pull(self, groupId, artifactId, version, type='war', server_groups=DEFAULT_SERVER_GROUP,
            path=None, content_host=DEFAULT_CONTENT_HOST, content_host_ep=DEFAULT_CONTENT_HOST_EP,
-           content_host_port=DEFAULT_CONTENT_HOST_PORT,
-           content_host_prot=DEFAULT_CONTENT_HOST_PROT):
+           content_host_port=DEFAULT_CONTENT_HOST_PORT):
     """ Pull artifact from artifact repository into wildfly content repository. """
     
     self.deploy(groupId, artifactId, version, type, server_groups,
                 path, enabled=False,
                 content_host=content_host, content_host_ep=content_host_ep,
-                content_host_port=content_host_port, content_host_prot=content_host_prot)
+                content_host_port=content_host_port)
     
   def deploy(self, groupId, artifactId, version, type=DEFAULT_ARTIFACT_TYPE,
              server_groups=DEFAULT_SERVER_GROUP,
              path=None, enabled=True, force=True,
              content_host=DEFAULT_CONTENT_HOST, content_host_ep=DEFAULT_CONTENT_HOST_EP,
-             content_host_port=DEFAULT_CONTENT_HOST_PORT,
-             content_host_prot=DEFAULT_CONTENT_HOST_PROT):
+             content_host_port=DEFAULT_CONTENT_HOST_PORT):
     """ Deploy artifact to WildFly. """
 
     # TODO need to handle SNAPSHOT versions
@@ -102,17 +99,15 @@ class DeploymentApiMixin(object):
     if path is None:
       url = ''
       if content_host_ep == 'nexus':
-        BASE_URL = '{}://{}:{}/nexus' \
-                       '/service/local/repo_groups/public/content'.format(content_host_prot,
-                                                                          content_host,
+        BASE_URL = '{}:{}/nexus' \
+                       '/service/local/repo_groups/public/content'.format(content_host,
                                                                           content_host_port)
         url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(BASE_URL,
                                                  groupId.replace('.', '/'),
                                                  artifactId, version, type)
       elif content_host_ep == 'maven2':
-        BASE_URL = '{}://{}:{}/maven2'.format(content_host_prot,
-                                              content_host,
-                                              content_host_port)
+        BASE_URL = '{}:{}/maven2'.format(content_host,
+                                        content_host_port)
         url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(BASE_URL,
                                                  groupId.replace('.', '/'),
                                                  artifactId, version, type)
