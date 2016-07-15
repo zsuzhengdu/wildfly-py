@@ -48,11 +48,13 @@ class ServerApiMixin(object):
         return self.execute(operation, {'blocking': blocking}, address)
 
     def start_servers(self, server_group=None, blocking=False):
-        """ Starts all configured servers in domain or server_group that are not currently running. """
+        """ Starts all configured servers in domain or
+        server_group that are not currently running. """
         return self._server_operation('start-servers', server_group, blocking)
 
     def stop_servers(self, server_group=None, blocking=False):
-        """ Stops all servers currently running in the domain or server_group. """
+        """ Stops all servers currently running in the domain or
+        server_group. """
         return self._server_operation('stop-servers', server_group, blocking)
 
     def reload_servers(self, server_group=None, blocking=False):
@@ -60,14 +62,15 @@ class ServerApiMixin(object):
         return self._server_operation('reload-servers', server_group, blocking)
 
     def restart_servers(self, server_group=None, blocking=False):
-        """ Restart all servers currently running in the domain or server_group. """
+        """ Restart all servers currently running in the domain or
+        server_group. """
         return self._server_operation(
             'restart-servers', server_group, blocking)
 
     def read_log_file(self, host=None):
-        """ Reads the contents of a log file.
-        The file must be in the jboss.server.log.dir and must be defined as
-        a file-handler, periodic-rotating-file-handler or size-rotating-file-handler. """
+        """ Reads the contents of a log file. The file must be in the
+        jboss.server.log.dir and must be defined as a file-handler,
+        periodic-rotating-file-handler or size-rotating-file-handler. """
 
         if host is None:
             hosts = self.hosts()

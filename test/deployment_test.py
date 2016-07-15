@@ -192,8 +192,9 @@ class DeployTest(base.BaseTestCase):
     def test_deploy_file(self):
 
         NEXUS_BASE_URL = 'http://{}:{}/nexus' \
-                         '/service/local/repo_groups/public/content'.format(DEFAULT_NEXUS_HOST,
-                                                                            DEFAULT_NEXUS_PORT)
+                         '/service/local/repo_groups/public/content'\
+            .format(DEFAULT_NEXUS_HOST, DEFAULT_NEXUS_PORT)
+
         url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(
             NEXUS_BASE_URL,
             DEFAULT_GROUP_ID.replace(
@@ -252,7 +253,8 @@ class DeployTest(base.BaseTestCase):
 
     def test_deploy_url_not_exist(self):
 
-        with self.assertRaisesRegexp(requests.exceptions.HTTPError, "Not Found for url"):
+        with self.assertRaisesRegexp(requests.exceptions.HTTPError,
+                                     "Not Found for url"):
             self.client.deploy('fake', 'fake', 'fake')
 
     @unittest.skip("still working on this one")
@@ -267,9 +269,11 @@ class DeployTest(base.BaseTestCase):
         except Exception as e:
             self.fail(base.UNEXPECTED_EXCEPTION_FORMAT.format(e))
 
-        result = self.client.read_attribute('enabled',
-                                            [{'server-group': DEFAULT_SERVER_GROUP},
-                                             {'deployment': DEFAULT_DEPLOYMENT_NAME}])
+        result = self.client.read_attribute(
+            'enabled',
+            [{'server-group': DEFAULT_SERVER_GROUP},
+             {'deployment': DEFAULT_DEPLOYMENT_NAME}])
+
         self.assertTrue(result)
 
         try:
@@ -280,9 +284,11 @@ class DeployTest(base.BaseTestCase):
         except Exception as e:
             self.fail(base.UNEXPECTED_EXCEPTION_FORMAT.format(e))
 
-        result = self.client.read_attribute('enabled',
-                                            [{'server-group': DEFAULT_SERVER_GROUP},
-                                             {'deployment': DEFAULT_DEPLOYMENT_NAME}])
+        result = self.client.read_attribute(
+            'enabled',
+            [{'server-group': DEFAULT_SERVER_GROUP},
+             {'deployment': DEFAULT_DEPLOYMENT_NAME}])
+
         self.assertTrue(result)
         self.client.undeploy(DEFAULT_DEPLOYMENT_NAME)
 

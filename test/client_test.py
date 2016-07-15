@@ -65,14 +65,16 @@ class ExecuteTest(base.BaseTestCase):
     def test_execute_controller_bad_port(self):
         client = wildfly.Client(base.WILDFLY_CONTAINER_NAME, 99990)
         operation = 'read-resource'
-        with self.assertRaisesRegexp(requests.ConnectionError, 'Connection refused'):
+        with self.assertRaisesRegexp(requests.ConnectionError,
+                                     'Connection refused'):
             client.execute(operation=operation)
         client.close()
 
     def test_execute_controller_bad_address(self):
         client = wildfly.Client('invalidaddress')
         operation = 'read-resource'
-        with self.assertRaisesRegexp(requests.ConnectionError, 'Name or service not known'):
+        with self.assertRaisesRegexp(requests.ConnectionError,
+                                     'Name or service not known'):
             client.execute(operation=operation)
         client.close()
 
@@ -80,7 +82,8 @@ class ExecuteTest(base.BaseTestCase):
     def test_execute_controller_down(self):
         base.stop_wildfly_service()
         operation = 'read-resource'
-        with self.assertRaisesRegexp(requests.ConnectionError, 'No route to host'):
+        with self.assertRaisesRegexp(requests.ConnectionError,
+                                     'No route to host'):
             self.client.execute(operation=operation)
         base.start_wildfly_service()
 

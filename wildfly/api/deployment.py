@@ -44,7 +44,9 @@ class DeploymentApiMixin(object):
         for server in servers:
             if servers[server]['status'] != 'STOPPED':
                 deployments_on_server = self.read_children_resources(
-                    'deployment', [{'host': servers[server]['host']}, {'server': server}], runtime=True)
+                    'deployment',
+                    [{'host': servers[server]['host']}, {'server': server}],
+                    runtime=True)
                 logger.debug(
                     'DEPLOYMENTS_ON_SERVER({}): {}'.format(
                         server, deployments_on_server))
@@ -88,7 +90,8 @@ class DeploymentApiMixin(object):
             content_host=DEFAULT_CONTENT_HOST,
             content_host_ep=DEFAULT_CONTENT_HOST_EP,
             content_host_port=DEFAULT_CONTENT_HOST_PORT):
-        """ Pull artifact from artifact repository into wildfly content repository. """
+        """ Pull artifact from artifact repository into wildfly content
+        repository. """
 
         self.deploy(groupId, artifactId, version, type, server_groups,
                     path, enabled=False,
@@ -113,22 +116,32 @@ class DeploymentApiMixin(object):
         # TODO need to handle SNAPSHOT versions
 
         if path is None:
-            url = ''
             if content_host_ep == 'nexus':
-                BASE_URL = '{}:{}/nexus' \
-                    '/service/local/repo_groups/public/content'.format(content_host,
-                                                                       content_host_port)
+                BASE_URL = '{}:{}/nexus/service/local/repo_groups' \
+                           '/public/content'.format(content_host,
+                                                    content_host_port)
+
                 url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(
-                    BASE_URL, groupId.replace('.', '/'), artifactId, version, type)
+                    BASE_URL,
+                    groupId.replace('.', '/'),
+                    artifactId,
+                    version,
+                    type)
+
             elif content_host_ep == 'maven2':
                 BASE_URL = '{}:{}/maven2'.format(content_host,
                                                  content_host_port)
                 url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(
-                    BASE_URL, groupId.replace('.', '/'), artifactId, version, type)
+                    BASE_URL,
+                    groupId.replace('.', '/'),
+                    artifactId,
+                    version,
+                    type)
+
             else:
                 # Not supported
-                raise Exception(
-                    "Content host type {} not supported".format(content_host_ep))
+                raise Exception("Content host type {} not supported"
+                                .format(content_host_ep))
 
             # check if url exists
             response = requests.head(url)
@@ -185,7 +198,8 @@ class DeploymentApiMixin(object):
         response = self.add(address, {'enabled': enabled})
 
     def disable(self, name, server_groups=DEFAULT_SERVER_GROUP):
-        """ Disable artifact in given server_groups, but keep artifact in assigned server_groups. """
+        """ Disable artifact in given server_groups, but keep artifact in
+        assigned server_groups. """
         address = [{'server-group': server_groups},
                    {'deployment': name}]
 

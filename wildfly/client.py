@@ -106,7 +106,8 @@ class Client(requests.Session,
         """ Read attribute of resource. """
 
         response = self.execute('read-attribute',
-                                {'name': name, 'include-defaults': include_defaults},
+                                {'name': name,
+                                 'include-defaults': include_defaults},
                                 address)
         return response.json()['result']
 
@@ -119,7 +120,8 @@ class Client(requests.Session,
         return response
 
     def unset_attribute(self, name, address=[]):
-        """ Sets the value of an individual attribute to the undefined value. """
+        """ Sets the value of an individual attribute to the undefined
+        value. """
 
         response = self.execute('unset-attribute',
                                 {'name': name},
@@ -127,7 +129,8 @@ class Client(requests.Session,
         return response.json()['result']
 
     def read_children_names(self, child_type, address=[]):
-        """ Returns a list of the names of all child resources of a given type. """
+        """ Returns a list of the names of all child resources of a
+        given type. """
 
         response = self.execute('read-children-names',
                                 {'child-type': child_type},
@@ -137,7 +140,8 @@ class Client(requests.Session,
         return None
 
     def read_children_resources(self, child_type, address=[], runtime=False):
-        """ Returns a list of the resources of all child resources of a given type. """
+        """ Returns a list of the resources of all child resources of a
+        given type. """
 
         response = self.execute('read-children-resources',
                                 {'child-type': child_type,
@@ -149,7 +153,8 @@ class Client(requests.Session,
         return None
 
     def read_operation_names(self, address=[]):
-        """ Returns a list of the names of all the operations the resource supports. """
+        """ Returns a list of the names of all the operations the resource
+        supports. """
 
         response = self.execute('read-operation-names',
                                 address)
@@ -169,7 +174,8 @@ class Client(requests.Session,
         return None
 
     def read_children_types(self, address=[]):
-        """ Returns a list of the types of child resources the resource supports. """
+        """ Returns a list of the types of child resources the resource
+        supports. """
 
         response = self.execute('read-children-types',
                                 address)

@@ -8,12 +8,16 @@ class ServerTest(base.BaseTestCase):
     def test_list_servers(self):
         servers = self.client.servers()
         self.assertIn(
-            '{}-0'.format(socket.gethostbyname(base.WILDFLY_CONTAINER_NAME)), servers)
+            '{}-0'.format(socket.
+                          gethostbyname(base.WILDFLY_CONTAINER_NAME)),
+            servers)
 
     def test_list_servers_in_group(self):
         servers = self.client.servers(server_group=DEFAULT_SERVER_GROUP)
         self.assertIn(
-            '{}-0'.format(socket.gethostbyname(base.WILDFLY_CONTAINER_NAME)), servers)
+            '{}-0'.format(
+                socket.gethostbyname(base.WILDFLY_CONTAINER_NAME)),
+            servers)
 
 
 class StartServersTest(base.BaseTestCase):
