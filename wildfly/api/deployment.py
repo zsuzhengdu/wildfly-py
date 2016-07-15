@@ -5,8 +5,9 @@ import requests
 from .. import util
 
 
-DEFAULT_NEXUS_HOST = 'nexus.cenx.localnet'
-DEFAULT_NEXUS_PORT = '8081'
+DEFAULT_CONTENT_HOST = 'http://repo.maven.apache.org'
+DEFAULT_CONTENT_HOST_EP = 'maven2'
+DEFAULT_CONTENT_HOST_PORT = '80'
 DEFAULT_SERVER_GROUP = 'A'
 DEFAULT_ARTIFACT_TYPE = 'war'
 
@@ -77,29 +78,42 @@ class DeploymentApiMixin(object):
     return self.deployments()[name]['status']
   
   def pull(self, groupId, artifactId, version, type='war', server_groups=DEFAULT_SERVER_GROUP,
-           path=None, nexus_host=DEFAULT_NEXUS_HOST, nexus_port=DEFAULT_NEXUS_PORT):
+           path=None, content_host=DEFAULT_CONTENT_HOST, content_host_ep=DEFAULT_CONTENT_HOST_EP,
+           content_host_port=DEFAULT_CONTENT_HOST_PORT):
     """ Pull artifact from artifact repository into wildfly content repository. """
     
     self.deploy(groupId, artifactId, version, type, server_groups,
                 path, enabled=False,
-                nexus_host=nexus_host, nexus_port=nexus_port)
+                content_host=content_host, content_host_ep=content_host_ep,
+                content_host_port=content_host_port)
     
   def deploy(self, groupId, artifactId, version, type=DEFAULT_ARTIFACT_TYPE,
              server_groups=DEFAULT_SERVER_GROUP,
              path=None, enabled=True, force=True,
-             nexus_host=DEFAULT_NEXUS_HOST, nexus_port=DEFAULT_NEXUS_PORT):
+             content_host=DEFAULT_CONTENT_HOST, content_host_ep=DEFAULT_CONTENT_HOST_EP,
+             content_host_port=DEFAULT_CONTENT_HOST_PORT):
     """ Deploy artifact to WildFly. """
 
     # TODO need to handle SNAPSHOT versions
     
     if path is None:
-      
-      NEXUS_BASE_URL = 'http://{}:{}/nexus' \
-                       '/service/local/repo_groups/public/content'.format(nexus_host,
-                                                                          nexus_port)
-      url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(NEXUS_BASE_URL,
+      url = ''
+      if content_host_ep == 'nexus':
+        BASE_URL = '{}:{}/nexus' \
+                       '/service/local/repo_groups/public/content'.format(content_host,
+                                                                          content_host_port)
+        url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(BASE_URL,
                                                  groupId.replace('.', '/'),
                                                  artifactId, version, type)
+      elif content_host_ep == 'maven2':
+        BASE_URL = '{}:{}/maven2'.format(content_host,
+                                        content_host_port)
+        url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(BASE_URL,
+                                                 groupId.replace('.', '/'),
+                                                 artifactId, version, type)
+      else:
+        # Not supported
+        raise Exception("Content host type {} not supported".format(content_host_ep))
 
       # check if url exists
       response = requests.head(url)
