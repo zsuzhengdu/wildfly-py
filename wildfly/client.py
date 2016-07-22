@@ -67,8 +67,7 @@ class Client(requests.Session,
 
         request = {'address': address, 'operation': operation}
         request.update(parameters)
-        response = self._post(request)
-        return response
+        return self._post(request)
 
     def add(self, address, parameters=None):
         """ Creates a new management resource. """
@@ -109,7 +108,7 @@ class Client(requests.Session,
                                 {'name': name,
                                  'include-defaults': include_defaults},
                                 address)
-        return response.json()['result']
+        return response.json()['result'] if util.is_success(response) else None
 
     def write_attribute(self, name, value, address=[]):
         """ Write value of attribute of resource. """
@@ -126,7 +125,7 @@ class Client(requests.Session,
         response = self.execute('unset-attribute',
                                 {'name': name},
                                 address)
-        return response.json()['result']
+        return response.json()['result'] if util.is_success(response) else None
 
     def read_children_names(self, child_type, address=[]):
         """ Returns a list of the names of all child resources of a
@@ -135,9 +134,7 @@ class Client(requests.Session,
         response = self.execute('read-children-names',
                                 {'child-type': child_type},
                                 address)
-        if util.is_success(response):
-            return response.json()['result']
-        return None
+        return response.json()['result'] if util.is_success(response) else None
 
     def read_children_resources(self, child_type, address=[], runtime=False):
         """ Returns a list of the resources of all child resources of a
@@ -148,9 +145,7 @@ class Client(requests.Session,
                                  'include-runtime': runtime},
                                 address)
         logger.debug(response.json())
-        if util.is_success(response):
-            return response.json()['result']
-        return None
+        return response.json()['result'] if util.is_success(response) else None
 
     def read_operation_names(self, address=[]):
         """ Returns a list of the names of all the operations the resource
@@ -158,9 +153,7 @@ class Client(requests.Session,
 
         response = self.execute('read-operation-names',
                                 address)
-        if util.is_success(response):
-            return response.json()['result']
-        return None
+        return response.json()['result'] if util.is_success(response) else None
 
     def read_operation_description(self, name, address=[]):
         """ Returns the description of an operation, along with details of """
@@ -169,9 +162,7 @@ class Client(requests.Session,
         response = self.execute('read-operation-description',
                                 {'name': name},
                                 address)
-        if util.is_success(response):
-            return response.json()['result']
-        return None
+        return response.json()['result'] if util.is_success(response) else None
 
     def read_children_types(self, address=[]):
         """ Returns a list of the types of child resources the resource
@@ -179,9 +170,7 @@ class Client(requests.Session,
 
         response = self.execute('read-children-types',
                                 address)
-        if util.is_success(response):
-            return response.json()['result']
-        return None
+        return response.json()['result'] if util.is_success(response) else None
 
     def version(self):
         """ Prints version of WildFly. """
