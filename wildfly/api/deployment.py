@@ -111,22 +111,33 @@ class DeploymentApiMixin(object):
             content_host=DEFAULT_CONTENT_HOST,
             content_host_ep=DEFAULT_CONTENT_HOST_EP,
             content_host_port=DEFAULT_CONTENT_HOST_PORT):
+
         """ Deploy artifact to WildFly. """
-
-        # TODO need to handle SNAPSHOT versions
-
         if path is None:
             if content_host_ep == 'nexus':
-                BASE_URL = '{}:{}/nexus/service/local/repo_groups' \
+                if 'SNAPSHOT' not in version:
+                    BASE_URL = '{}:{}/nexus/service/local/repo_groups' \
                            '/public/content'.format(content_host,
                                                     content_host_port)
 
-                url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(
-                    BASE_URL,
-                    groupId.replace('.', '/'),
-                    artifactId,
-                    version,
-                    type)
+                    url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(
+                        BASE_URL,
+                        groupId.replace('.', '/'),
+                        artifactId,
+                        version,
+                        type
+                    )
+                else:
+                    BASE_URL = 'http://{}:{}/nexus/service/local/artifact' \
+                           '/maven/content?r=public'.format(content_host,
+                                                    content_host_port)
+                    url = '{0}&g={1}&a={2}&v={3}&p={4}'.format(
+                        BASE_URL,
+                        groupId.replace('.', '/'),
+                        artifactId,
+                        version,
+                        type
+                    )
 
             elif content_host_ep == 'maven2':
                 BASE_URL = '{}:{}/maven2'.format(content_host,
