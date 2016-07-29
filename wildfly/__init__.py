@@ -11,3 +11,4 @@ ch.setFormatter(formatter)
 logger = logging.getLogger(__name__)
 #logger.setLevel(logging.INFO)
 logger.addHandler(ch)
+
