@@ -6,10 +6,8 @@ import requests
 from . import util
 from . import api
 
-log_format = '%(asctime)s | %(levelname)7s | %(name)s | line:%(lineno)4s | %(message)s'
-logging.basicConfig(format=log_format, level=logging.DEBUG)
-
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # Define some
 KEY_OUTCOME = "outcome"
@@ -176,29 +174,6 @@ class Client(requests.Session,
         resp = self.read_resource(address)
         return resp.json()
 
-    def get_deployed_apps(self, server_group=None):
-        """
-        Returns a list of applications deployed on a server group,
-        :param server_group The desired server group
-        :return a dictionary where the keys are the server group, and the value is a list of all applications running \
-                in the said server group
-        """
-        deployed_apps = self.deployments(server_group)
-        # Let's parse the output of the deployed output so it's in a format we expect
-        ret_value = {}
-        for war, value in deployed_apps.items():
-            sgs = value.get('server-groups', [])
-            for sg in sgs:
-                if sg not in ret_value:
-                    ret_value[sg] = []
-                ret_value[sg].append(war)
-
-        if server_group:
-            item = ret_value.get(server_group, [])
-            ret_value = {server_group: item}
-        logger.debug("Results = {result}".format(result=ret_value))
-        return ret_value
-
     def get_server_name(self, host):
         """
         Return a single
@@ -259,58 +234,6 @@ class Client(requests.Session,
                                                                                                 server=svr_name,
                                                                                                 host=val))
         return val
-
-    def _get_hostname_map(self):
-        """
-        Returns a dictionary that has a mapping of the physical machine qualified_hostname to a WF host and WF server.
-
-        The dictionary has the following sample structure
-            { 'wf-hos-2t': 'wf-server-1': { 'server-group-1': "qualified-host-name',
-                                            'server-group-2': "qualified-host-name'},
-                           'wf-server-2': { 'server-group-3': "qualified-host-name'},
-              'wf-host-2': 'wf-server-3': { 'server-group-4': "qualified-host-name'},
-                           'wf-server-4': { 'server-group-5': "qualified-host-name',
-                                            'server-group-6': "qualified-host-name',
-                                            'server-group-7': "qualified-host-name'}
-            }
-        :return a dictionary that has a mapping of the WF host, server and server group to a physically qualified domain
-                name
-        """
-        logger.debug("Generating Hostname map")
-        host_map = {}
-        for host in self.hosts():
-            logger.debug("host is {host}".format(host=host))
-            if host not in host_map:
-                # Ensure we have the host key is in the host_map
-                host_map[host] = {}
-            # Get the server name
-            server_name = self.get_server_name(host)
-
-            logger.debug("server name is {server}".format(server=server_name))
-            if server_name not in host_map[host]:
-                # Ensure the server name is a key under the host
-                host_map[host][server_name] = {}
-
-            if server_name:
-                try:
-                    # Not all WildFly server names will have a server group, so we need to wrap it with a try catch.
-                    sg = self.get_server_group(host, server_name)
-                    qualified_hostname = self.get_hostname(host, server_name)
-
-                    # Set the Server group and qualified_hostname
-                    host_map[host][server_name][sg] = qualified_hostname
-                    logger.info("WildFly host {wfhost} and server {server} has a ".format(wfhost=host,
-                                                                                          server=server_name,) +
-                                "server group {sg} and qualified_hostname of {host}".format(sg=sg,
-                                                                                            host=qualified_hostname,))
-                except (SystemError, KeyError) as e:
-                    # if an error occurs, the WF server may not have a server-group as it may be the data container
-                    # Just log the error and "pass"
-                    logger.error("(NOT A BUG) A failure occurred: {err}".format(err=e))
-
-        logger.debug("done generating hostname map.")
-        logger.info("The Hostname map is {map}".format(map=host_map))
-        return host_map
 
     def get_server_group_host(self, server_group):
         """
