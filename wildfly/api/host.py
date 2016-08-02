@@ -57,12 +57,12 @@ class HostApiMixin(object):
 
                     # Set the Server group and qualified_hostname
                     host_map[host][server_name][sg] = qualified_hostname
-                    logger.info("WildFly host {wfhost} and server {server} has "
-                                "a server group {sg} and qualified_hostname of "
-                                "{host}".format(wfhost=host,
-                                                server=server_name,
-                                                sg=sg,
-                                                host=qualified_hostname,))
+                    logger.debug("WildFly host {wfhost} and server {server} has "
+                                 "a server group {sg} and qualified_hostname of "
+                                 "{host}".format(wfhost=host,
+                                                 server=server_name,
+                                                 sg=sg,
+                                                 host=qualified_hostname,))
                 except (SystemError, KeyError) as e:
                     # if an error occurs, the WF server may not have a
                     # server-group as it may be the data container. Just log
@@ -70,6 +70,5 @@ class HostApiMixin(object):
                     logger.error("(NOT A BUG) A failure occurred: "
                                  "{err}".format(err=e))
 
-        logger.debug("done generating hostname map.")
-        logger.info("The Hostname map is {map}".format(map=host_map))
+        logger.debug("done generating hostname map.  The Hostname map is {map}".format(map=host_map))
         return host_map
