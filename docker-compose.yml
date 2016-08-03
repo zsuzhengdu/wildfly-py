@@ -16,7 +16,7 @@ wildfly:
     DOMAIN_CONTROLLER: "true"
     NUM_SERVERS: 1
 
-wildfly-py:
+test:
   build: .
   links:
     - wildfly
@@ -24,19 +24,3 @@ wildfly-py:
     - /var/run/docker.sock:/var/run/docker.sock
   command: py.test
 
-wildfly-py-debug:
-  build: .
-  container_name: wildfly-py-debug
-  links:
-    - wildfly
-  volumes:
-    - .:/code
-    - /var/run/docker.sock:/var/run/docker.sock
-  working_dir: /code
-  command: /bin/bash
-
-wildfly-cli:
-  image: docker.cenx.localnet:5000/wildfly:8.2.0-b33
-  links:
-    - wildfly
-  command: /opt/wildfly/bin/jboss-cli.sh --controller=wildfly-py-fixture:9990 --connect --user=admin --password=admin
