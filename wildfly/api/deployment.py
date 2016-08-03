@@ -2,14 +2,15 @@ import os
 import errno
 import logging
 import requests
+import socket
 from .. import util
 
 
-DEFAULT_CONTENT_HOST = 'http://repo.maven.apache.org'
-DEFAULT_CONTENT_HOST_EP = 'maven2'
-DEFAULT_CONTENT_HOST_PORT = '80'
-DEFAULT_SERVER_GROUP = 'A'
-DEFAULT_ARTIFACT_TYPE = 'war'
+DEFAULT_CONTENT_HOST = socket.gethostbyname('nexus')
+DEFAULT_CONTENT_HOST_ENDPOINT = None
+DEFAULT_CONTENT_HOST_PORT = '8081'
+DEFAULT_SERVER_GROUP = 'main-server-group'
+DEFAULT_ARTIFACT_TYPE = 'jar'
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -88,7 +89,7 @@ class DeploymentApiMixin(object):
             server_groups=DEFAULT_SERVER_GROUP,
             path=None,
             content_host=DEFAULT_CONTENT_HOST,
-            content_host_ep=DEFAULT_CONTENT_HOST_EP,
+            content_host_ep=DEFAULT_CONTENT_HOST_ENDPOINT,
             content_host_port=DEFAULT_CONTENT_HOST_PORT):
         """ Pull artifact from artifact repository into wildfly content
         repository. """
@@ -109,16 +110,15 @@ class DeploymentApiMixin(object):
             enabled=True,
             force=True,
             content_host=DEFAULT_CONTENT_HOST,
-            content_host_ep=DEFAULT_CONTENT_HOST_EP,
+            content_host_ep=DEFAULT_CONTENT_HOST_ENDPOINT,
             content_host_port=DEFAULT_CONTENT_HOST_PORT):
-
         """ Deploy artifact to WildFly. """
         if path is None:
             if content_host_ep == 'nexus':
                 if 'SNAPSHOT' not in version:
                     BASE_URL = '{}:{}/nexus/service/local/repo_groups' \
-                           '/public/content'.format(content_host,
-                                                    content_host_port)
+                        '/public/content'.format(content_host,
+                                                 content_host_port)
 
                     url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(
                         BASE_URL,
@@ -129,8 +129,9 @@ class DeploymentApiMixin(object):
                     )
                 else:
                     BASE_URL = 'http://{}:{}/nexus/service/local/artifact' \
-                           '/maven/content?r=public'.format(content_host,
-                                                    content_host_port)
+                        '/maven/content?r=public'.format(content_host,
+                                                         content_host_port)
+
                     url = '{0}&g={1}&a={2}&v={3}&p={4}'.format(
                         BASE_URL,
                         groupId.replace('.', '/'),
@@ -148,11 +149,22 @@ class DeploymentApiMixin(object):
                     artifactId,
                     version,
                     type)
-
+            elif content_host_ep is None:
+                BASE_URL = '{}:{}/service/local/repositories/releases' \
+                    '/content'.format(content_host, content_host_port)
+                url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(
+                    BASE_URL,
+                    groupId.replace('.', '/'),
+                    artifactId,
+                    version,
+                    type
+                )
             else:
                 # Not supported
                 raise Exception("Content host type {} not supported"
                                 .format(content_host_ep))
+
+            url = 'http://' + url
 
             # check if url exists
             response = requests.head(url)
@@ -193,14 +205,18 @@ class DeploymentApiMixin(object):
         if type == 'war':
             runtime_name = artifactId + '-' + version + '.' + type
         elif type == 'jar':
-            runtime_name = artifactId.split(
-                '-')[-2] + '-resources' + '.' + type
+            try:
+                runtime_name = artifactId.split('-')[-2] \
+                    + '-resources' + '.' + type
+            except IndexError:
+                runtime_name = artifactId + '-' + version + '.' + type
 
-        # add artifact to content repository
+
         byte_value = response.json()['result']['BYTES_VALUE']
-        request = {"content": [{"hash": {"BYTES_VALUE": byte_value}}],
-                   "address": [{"deployment": "{}".format(runtime_name)}],
-                   "operation": "add"}
+
+        request = {'content': [{'hash': {'BYTES_VALUE': byte_value}}],
+            'address': [{'deployment': '{}'.format(runtime_name)}],
+            'operation': 'add'}
         response = self._post(request)
 
         # add artifact to server-group(s)
@@ -239,11 +255,3 @@ class DeploymentApiMixin(object):
             address = [{"deployment": name}]
             response = self.remove(address)
         return response
-
-    def _download_from_bamboo(self):
-
-        print "NOT YET IMPLEMENTED"
-        # ATLASSIAN_USER=ian.kent
-        # wget -nv --http-user=$ATLASSIAN_USER --ask-password
-        # http://cenx-cf.atlassian.net/builds/browse/UI-APOLLO-$APP_BUILD/artifact/shared/apollo-app/apollo.war?os_authType=basic
-        # -O /opt/cenx/deploy/apollo.war

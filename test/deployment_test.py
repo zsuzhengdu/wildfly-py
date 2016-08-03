@@ -11,12 +11,12 @@ from . import base
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-DEFAULT_NEXUS_HOST = 'nexus.cenx.localnet'
+DEFAULT_NEXUS_HOST = 'nexus'
 DEFAULT_NEXUS_PORT = '8081'
-DEFAULT_GROUP_ID = 'org.jboss.mod_cluster'
-DEFAULT_ARTIFACT_ID = 'mod_cluster-demo-server'
-DEFAULT_ARTIFACT_VERSION = '1.2.6.Final'
-DEFAULT_ARTIFACT_TYPE = 'war'
+DEFAULT_GROUP_ID = 'com'
+DEFAULT_ARTIFACT_ID = 'project'
+DEFAULT_ARTIFACT_VERSION = '1.0'
+DEFAULT_ARTIFACT_TYPE = 'jar'
 DEFAULT_DEPLOYMENT_NAME = '{}-{}.{}'.format(
     DEFAULT_ARTIFACT_ID,
     DEFAULT_ARTIFACT_VERSION,
@@ -30,7 +30,9 @@ class DeploymentTest(base.BaseTestCase):
             self.client.deploy(
                 DEFAULT_GROUP_ID,
                 DEFAULT_ARTIFACT_ID,
-                DEFAULT_ARTIFACT_VERSION)
+                DEFAULT_ARTIFACT_VERSION,
+                type='jar'
+            )
             deployments = self.client.deployments(
                 server_group=DEFAULT_SERVER_GROUP)
             for key in deployments.keys():
@@ -50,7 +52,9 @@ class DeploymentTest(base.BaseTestCase):
             self.client.deploy(
                 DEFAULT_GROUP_ID,
                 DEFAULT_ARTIFACT_ID,
-                DEFAULT_ARTIFACT_VERSION)
+                DEFAULT_ARTIFACT_VERSION,
+                type='jar'
+            )
             deployments = self.client.deployments()
             self.assertIn(DEFAULT_DEPLOYMENT_NAME, deployments)
             self.assertTrue(
@@ -68,7 +72,9 @@ class DeploymentTest(base.BaseTestCase):
                 DEFAULT_GROUP_ID,
                 DEFAULT_ARTIFACT_ID,
                 DEFAULT_ARTIFACT_VERSION,
-                enabled=False)
+                type='jar',
+                enabled=False
+            )
             deployments = self.client.deployments()
             self.assertIn(DEFAULT_DEPLOYMENT_NAME, deployments)
             self.assertFalse(
@@ -86,7 +92,9 @@ class DeploymentTest(base.BaseTestCase):
             self.client.deploy(
                 DEFAULT_GROUP_ID,
                 DEFAULT_ARTIFACT_ID,
-                DEFAULT_ARTIFACT_VERSION)
+                DEFAULT_ARTIFACT_VERSION,
+                type='jar'
+            )
             deployments = self.client.deployments()
             self.assertIn(DEFAULT_DEPLOYMENT_NAME, deployments)
             self.assertTrue(deployments[DEFAULT_DEPLOYMENT_NAME]['enabled'])
@@ -104,7 +112,9 @@ class DeploymentTest(base.BaseTestCase):
             self.client.deploy(
                 DEFAULT_GROUP_ID,
                 DEFAULT_ARTIFACT_ID,
-                DEFAULT_ARTIFACT_VERSION)
+                DEFAULT_ARTIFACT_VERSION,
+                type='jar'
+            )
             deployments = self.client.deployments(
                 server_group=DEFAULT_SERVER_GROUP)
         except Exception as e:
@@ -156,7 +166,8 @@ class PullTest(base.BaseTestCase):
             self.client.pull(
                 DEFAULT_GROUP_ID,
                 DEFAULT_ARTIFACT_ID,
-                DEFAULT_ARTIFACT_VERSION)
+                DEFAULT_ARTIFACT_VERSION,
+                type='jar')
             deployments = self.client.deployments()
             self.assertIn(DEFAULT_DEPLOYMENT_NAME, deployments)
             self.assertFalse(deployments[DEFAULT_DEPLOYMENT_NAME]['enabled'])
@@ -324,7 +335,8 @@ class EnableDisableTest(base.BaseTestCase):
             self.client.pull(
                 DEFAULT_GROUP_ID,
                 DEFAULT_ARTIFACT_ID,
-                DEFAULT_ARTIFACT_VERSION)
+                DEFAULT_ARTIFACT_VERSION,
+                type='jar')
             self.client.enable(DEFAULT_DEPLOYMENT_NAME, DEFAULT_SERVER_GROUP)
             self.assertTrue(
                 self.client.is_deployment_enabled(DEFAULT_DEPLOYMENT_NAME))

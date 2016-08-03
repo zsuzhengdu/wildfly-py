@@ -1,6 +1,12 @@
+nexus:
+  image: sonatype/nexus
+  container_name: nexus
+  ports:
+    - "8081:8081"
+
 wildfly:
-  image: docker.cenx.localnet:5000/wildfly:8.2.0-b33
-  container_name: wildfly-py-fixture
+  build: ./wildfly
+  container_name: wildfly
   expose:
     - "9990"
     - "9999"
@@ -11,32 +17,33 @@ wildfly:
     - "8080:8080"
   volumes:
     - /opt/wildfly/domain
-  environment:
-    JVM_MAX_HEAP: 512m
-    DOMAIN_CONTROLLER: "true"
-    NUM_SERVERS: 1
 
-wildfly-py:
-  build: .
+java:
+  build: ./java
+  container_name: java
   links:
     - wildfly
+    - nexus
+  command: setup.sh
+  
+test:
+  build: .
+  container_name: test
+  links:
+    - wildfly
+    - nexus
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
   command: py.test
 
-wildfly-py-debug:
+debug:
   build: .
-  container_name: wildfly-py-debug
+  container_name: debug
   links:
     - wildfly
+    - nexus
   volumes:
     - .:/code
     - /var/run/docker.sock:/var/run/docker.sock
   working_dir: /code
-  command: /bin/bash
-
-wildfly-cli:
-  image: docker.cenx.localnet:5000/wildfly:8.2.0-b33
-  links:
-    - wildfly
-  command: /opt/wildfly/bin/jboss-cli.sh --controller=wildfly-py-fixture:9990 --connect --user=admin --password=admin
+  command: sh

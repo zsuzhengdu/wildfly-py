@@ -28,7 +28,7 @@ class ConnectionTimeoutTest(unittest.TestCase):
         except:
             pass
         end = time.time()
-        self.assertTrue(response is None)
+        self.assertTrue((response.status_code == 500))
         self.assertTrue(end - start < 2 * self.timeout)
 
 
@@ -65,16 +65,18 @@ class ExecuteTest(base.BaseTestCase):
     def test_execute_controller_bad_port(self):
         client = wildfly.Client(base.WILDFLY_CONTAINER_NAME, 99990)
         operation = 'read-resource'
-        with self.assertRaisesRegexp(requests.ConnectionError,
-                                     'Connection refused'):
+        with self.assertRaisesRegexp(
+                requests.ConnectionError,
+                'nodename nor servname provided, or not known'):
             client.execute(operation=operation)
         client.close()
 
     def test_execute_controller_bad_address(self):
         client = wildfly.Client('invalidaddress')
         operation = 'read-resource'
-        with self.assertRaisesRegexp(requests.ConnectionError,
-                                     'Name or service not known'):
+        with self.assertRaisesRegexp(
+                requests.ConnectionError,
+                'nodename nor servname provided, or not known'):
             client.execute(operation=operation)
         client.close()
 
@@ -174,7 +176,8 @@ class ReadChildrenResourcesTest(base.BaseTestCase):
 
     def test_read_children_resources(self):
         result = self.client.read_children_resources(
-            address=[], child_type='server-group')
+            address=[],
+            child_type='server-group')
         self.assertIsNotNone(result)
         self.assertIn(DEFAULT_SERVER_GROUP, result)
         self.assertEqual(result[DEFAULT_SERVER_GROUP]['deployment'], None)
