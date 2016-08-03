@@ -1,5 +1,5 @@
 wildfly:
-  image: 54.85.37.228:5000/wildfly:8.2.0-b33
+  image: ship.cenx.com/wildfly:8.2.0-b33
   container_name: wildfly-py-fixture
   expose:
     - "9990"
