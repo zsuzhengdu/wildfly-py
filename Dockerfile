@@ -8,7 +8,7 @@ FROM alpine:3.2
 
 MAINTAINER CENX "cenx.com"
 
-RUN apk update && apk add py-pip gcc python-dev
+RUN apk update && apk add py-pip gcc python-dev && rm -rf /var/cache/apk/*
 
 ADD . /home/wildfly-py
 WORKDIR /home/wildfly-py
