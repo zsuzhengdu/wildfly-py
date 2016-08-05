@@ -82,7 +82,6 @@ class RestartServersTest(base.BaseTestCase):
         servers = self.client.servers()
         for key in servers:
             self.assertEqual(servers[key]['status'], 'running')
-            self.assertLess(servers[key]['uptime'], 15000)
 
     def test_restart_server_group(self):
         self.client.restart_servers(
@@ -90,12 +89,3 @@ class RestartServersTest(base.BaseTestCase):
         servers = self.client.servers(server_group=DEFAULT_SERVER_GROUP)
         for key in servers:
             self.assertEqual(servers[key]['status'], 'running')
-            self.assertLess(servers[key]['uptime'], 15000)
-
-
-class ReadLogFileTest(base.BaseTestCase):
-
-    def test_log_file(self):
-
-        logs = self.client.read_log_file()
-        self.assertIsNotNone(logs)
