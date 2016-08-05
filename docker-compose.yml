@@ -1,5 +1,11 @@
+nexus:
+  image: sonatype/nexus
+  container_name: nexus
+  ports:
+    - "8081:8081"
+
 wildfly:
-  image: jboss/wildfly-admin
+  build: ./wildfly
   container_name: wildfly-py-fixture
   expose:
     - "9990"
@@ -16,6 +22,7 @@ test:
   build: .
   links:
     - wildfly
+    - nexus
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
   command: py.test
@@ -25,6 +32,7 @@ debug:
   container_name: debug
   links:
     - wildfly
+    - nexus
   volumes:
     - .:/code
     - /var/run/docker.sock:/var/run/docker.sock
