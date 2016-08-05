@@ -28,7 +28,7 @@ class ConnectionTimeoutTest(unittest.TestCase):
         except:
             pass
         end = time.time()
-        self.assertTrue(response is None)
+        self.assertTrue((response.status_code == 500))
         self.assertTrue(end - start < 2 * self.timeout)
 
 
@@ -66,7 +66,7 @@ class ExecuteTest(base.BaseTestCase):
         client = wildfly.Client(base.WILDFLY_CONTAINER_NAME, 99990)
         operation = 'read-resource'
         with self.assertRaisesRegexp(requests.ConnectionError,
-                                     'Connection refused'):
+                                     'nodename nor servname provided, or not known'):
             client.execute(operation=operation)
         client.close()
 
@@ -74,7 +74,7 @@ class ExecuteTest(base.BaseTestCase):
         client = wildfly.Client('invalidaddress')
         operation = 'read-resource'
         with self.assertRaisesRegexp(requests.ConnectionError,
-                                     'Name or service not known'):
+                                     'nodename nor servname provided, or not known'):
             client.execute(operation=operation)
         client.close()
 
