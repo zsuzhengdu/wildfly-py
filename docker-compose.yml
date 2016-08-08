@@ -6,7 +6,7 @@ nexus:
 
 wildfly:
   build: ./wildfly
-  container_name: wildfly-py-fixture
+  container_name: wildfly
   expose:
     - "9990"
     - "9999"
@@ -20,6 +20,7 @@ wildfly:
 
 test:
   build: .
+  container_name: test
   links:
     - wildfly
     - nexus
