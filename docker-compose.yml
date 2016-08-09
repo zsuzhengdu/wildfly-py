@@ -18,6 +18,14 @@ wildfly:
   volumes:
     - /opt/wildfly/domain
 
+java:
+  build: ./java
+  container_name: java
+  links:
+    - wildfly
+    - nexus
+  command: setup.sh
+  
 test:
   build: .
   container_name: test
