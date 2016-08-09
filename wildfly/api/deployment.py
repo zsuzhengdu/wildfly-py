@@ -205,7 +205,7 @@ class DeploymentApiMixin(object):
         if type == 'war':
             runtime_name = artifactId + '-' + version + '.' + type
         elif type == 'jar':
-            runtime_name = artifactId + '.' + type
+            runtime_name = artifactId + '-' + version + '.' + type
 
         byte_value = response.json()['result']['BYTES_VALUE']
 

@@ -3,7 +3,7 @@ services:
   - docker
 
 env:
-  DOCKER_COMPOSE_VERSION: 1.4.2
+  DOCKER_COMPOSE_VERSION: 1.8.0
 
 before_install:
   - sudo rm /usr/local/bin/docker-compose
@@ -14,3 +14,4 @@ before_install:
 script:
   - docker-compose up -d wildfly nexus java
   - docker-compose run test
+  - docker-compose down

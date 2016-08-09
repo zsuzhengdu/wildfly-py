@@ -166,7 +166,8 @@ class PullTest(base.BaseTestCase):
             self.client.pull(
                 DEFAULT_GROUP_ID,
                 DEFAULT_ARTIFACT_ID,
-                DEFAULT_ARTIFACT_VERSION)
+                DEFAULT_ARTIFACT_VERSION,
+                type='jar')
             deployments = self.client.deployments()
             self.assertIn(DEFAULT_DEPLOYMENT_NAME, deployments)
             self.assertFalse(deployments[DEFAULT_DEPLOYMENT_NAME]['enabled'])
@@ -334,7 +335,8 @@ class EnableDisableTest(base.BaseTestCase):
             self.client.pull(
                 DEFAULT_GROUP_ID,
                 DEFAULT_ARTIFACT_ID,
-                DEFAULT_ARTIFACT_VERSION)
+                DEFAULT_ARTIFACT_VERSION,
+                type='jar')
             self.client.enable(DEFAULT_DEPLOYMENT_NAME, DEFAULT_SERVER_GROUP)
             self.assertTrue(
                 self.client.is_deployment_enabled(DEFAULT_DEPLOYMENT_NAME))
