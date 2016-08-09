@@ -112,7 +112,8 @@ class DeploymentTest(base.BaseTestCase):
             self.client.deploy(
                 DEFAULT_GROUP_ID,
                 DEFAULT_ARTIFACT_ID,
-                DEFAULT_ARTIFACT_VERSION
+                DEFAULT_ARTIFACT_VERSION,
+                type='jar'
             )
             deployments = self.client.deployments(
                 server_group=DEFAULT_SERVER_GROUP)

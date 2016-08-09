@@ -2,10 +2,11 @@ import os
 import errno
 import logging
 import requests
+import socket
 from .. import util
 
 
-DEFAULT_CONTENT_HOST = '192.168.99.100'
+DEFAULT_CONTENT_HOST = socket.gethostbyname('nexus')
 DEFAULT_CONTENT_HOST_ENDPOINT = None
 DEFAULT_CONTENT_HOST_PORT = '8081'
 DEFAULT_SERVER_GROUP = 'main-server-group'
@@ -111,14 +112,13 @@ class DeploymentApiMixin(object):
             content_host=DEFAULT_CONTENT_HOST,
             content_host_ep=DEFAULT_CONTENT_HOST_ENDPOINT,
             content_host_port=DEFAULT_CONTENT_HOST_PORT):
-
         """ Deploy artifact to WildFly. """
         if path is None:
             if content_host_ep == 'nexus':
                 if 'SNAPSHOT' not in version:
                     BASE_URL = '{}:{}/nexus/service/local/repo_groups' \
-                           '/public/content'.format(content_host,
-                                                    content_host_port)
+                        '/public/content'.format(content_host,
+                                                 content_host_port)
 
                     url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(
                         BASE_URL,
@@ -129,8 +129,9 @@ class DeploymentApiMixin(object):
                     )
                 else:
                     BASE_URL = 'http://{}:{}/nexus/service/local/artifact' \
-                           '/maven/content?r=public'.format(content_host,
-                                                    content_host_port)
+                        '/maven/content?r=public'.format(content_host,
+                                                         content_host_port)
+
                     url = '{0}&g={1}&a={2}&v={3}&p={4}'.format(
                         BASE_URL,
                         groupId.replace('.', '/'),
@@ -148,9 +149,10 @@ class DeploymentApiMixin(object):
                     artifactId,
                     version,
                     type)
-            elif content_host_ep == None:
-                BASE_URL = '{}:{}/service/local/repositories/releases/content'.format(content_host,
-                                                    content_host_port)
+            elif content_host_ep is None:
+                logger.info('endpoint: {}'.format(content_host_ep))
+                BASE_URL = '{}:{}/service/local/repositories/releases' \
+                    '/content'.format(content_host, content_host_port)
                 url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(
                     BASE_URL,
                     groupId.replace('.', '/'),
@@ -204,15 +206,13 @@ class DeploymentApiMixin(object):
         if type == 'war':
             runtime_name = artifactId + '-' + version + '.' + type
         elif type == 'jar':
-            #runtime_name = artifactId.split(
-            #    '-')[-2] + '-resources' + '.' + type
             runtime_name = artifactId + '.' + type
 
-        # add artifact to content repository
         byte_value = response.json()['result']['BYTES_VALUE']
-        request = {"content": [{"hash": {"BYTES_VALUE": byte_value}}],
-                   "address": [{"deployment": "{}".format(runtime_name)}],
-                   "operation": "add"}
+
+        request = {'content': [{'hash': {'BYTES_VALUE': byte_value}}],
+            'address': [{'deployment': '{}'.format(runtime_name)}],
+            'operation': 'add'}
         response = self._post(request)
 
         # add artifact to server-group(s)
@@ -250,4 +250,4 @@ class DeploymentApiMixin(object):
             # remove deployment from content repository
             address = [{"deployment": name}]
             response = self.remove(address)
-        return 
+        return
