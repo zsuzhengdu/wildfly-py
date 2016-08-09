@@ -249,4 +249,4 @@ class DeploymentApiMixin(object):
             # remove deployment from content repository
             address = [{"deployment": name}]
             response = self.remove(address)
-        return
+        return response
