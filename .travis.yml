@@ -11,6 +11,6 @@ before_install:
   - chmod +x docker-compose
 
 script:
-  - docker-compose up -d wildfly nexus java
-  - docker-compose run test
+  - docker-compose up -d --build --force-recreate wildfly nexus java
+  - docker-compose up test
   - docker-compose down
