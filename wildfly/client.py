@@ -218,12 +218,12 @@ class Client(requests.Session,
         :param host  A Wildfly host as specified by the `ls /hosts` CLI command
         :return A string representing a WF Server name for the given WF host.
         """
-        logger.info("Retrieving server name for host '{host}'."
+        logger.debug("Retrieving server name for host '{host}'."
                     .format(host=host))
         address = [{'host': host}, {'server': '*'}]
         result = self.read_resource(address).json()
 
-        logger.info("Retrieved server name for wf host {host}.  Response is "
+        logger.debug("Retrieved server name for wf host {host}.  Response is "
                     "{resp}".format(host=host, resp=result))
         status = result.get(KEY_OUTCOME, None)
         if status != 'success':
@@ -254,10 +254,10 @@ class Client(requests.Session,
                                             server=server_name))
         address = [{'host': host}, {'server': server_name}]
         val = self.read_attribute('server-group', address, include_defaults=True)
-        logger.info("WildFly host {host} and server {server} has a server-group"
-                    " of {sg}".format(host=host,
-                                      server=server_name,
-                                      sg=val))
+        logger.debug("WildFly host {host} and server {server} has a server-group"
+                     " of {sg}".format(host=host,
+                                       server=server_name,
+                                       sg=val))
         return val
 
     def get_hostname(self, host, svr_name):
@@ -278,10 +278,10 @@ class Client(requests.Session,
         val = self.read_attribute('qualified-host-name',
                                   address,
                                   include_defaults=True)
-        logger.info("WildFly host {wfhost} and server {server} has a hostname "
-                    "of {host}".format(wfhost=host,
-                                       server=svr_name,
-                                       host=val))
+        logger.debug("WildFly host {wfhost} and server {server} has a hostname "
+                     "of {host}".format(wfhost=host,
+                                        server=svr_name,
+                                        host=val))
         return val
 
     def get_server_group_host(self, server_group):
