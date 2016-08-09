@@ -150,7 +150,6 @@ class DeploymentApiMixin(object):
                     version,
                     type)
             elif content_host_ep is None:
-                logger.info('endpoint: {}'.format(content_host_ep))
                 BASE_URL = '{}:{}/service/local/repositories/releases' \
                     '/content'.format(content_host, content_host_port)
                 url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(
