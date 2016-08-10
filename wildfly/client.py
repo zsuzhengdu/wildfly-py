@@ -53,7 +53,6 @@ class Client(requests.Session,
         self.host = host
         self.port = port
         self.endpoint = 'http://{}:{}/management'.format(self.host, self.port)
-        self._hostname_map = self._get_hostname_map()
 
     def _post(self, request):
 
