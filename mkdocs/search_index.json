@@ -1,0 +1,124 @@
+{
+    "docs": [
+        {
+            "location": "/", 
+            "text": "wildfly-py documentation\n\n\nAn API client for wildfly written in Python\n\n\nRequirements\n\n\n\n\nPython 2.7+\n\n\nWildFly 8.2+\n\n\n\n\nInstallation\n\n\nInstall package using pip:\n\n\npip install wildlfy-py\n\n\nDocumentation\n\n\nFull documentation is available in the \n/docs/\n directory.\n\n\nLicense\n\n\nThe project is licensed under the \nApache License, Version 2.0", 
+            "title": "Home"
+        }, 
+        {
+            "location": "/#wildfly-py-documentation", 
+            "text": "An API client for wildfly written in Python", 
+            "title": "wildfly-py documentation"
+        }, 
+        {
+            "location": "/#requirements", 
+            "text": "Python 2.7+  WildFly 8.2+", 
+            "title": "Requirements"
+        }, 
+        {
+            "location": "/#installation", 
+            "text": "Install package using pip:  pip install wildlfy-py", 
+            "title": "Installation"
+        }, 
+        {
+            "location": "/#documentation", 
+            "text": "Full documentation is available in the  /docs/  directory.", 
+            "title": "Documentation"
+        }, 
+        {
+            "location": "/#license", 
+            "text": "The project is licensed under the  Apache License, Version 2.0", 
+            "title": "License"
+        }, 
+        {
+            "location": "/api/", 
+            "text": "Client API\n\n\nTo instantiate a \nWildfly\n class that will allow you to communicate with a WildFly domain controller, simply do:\n\n\nfrom wildfly import Wildfly\nclient = Wildfly(host='localhost')\n\n\n\n\nParameters\n:\n\n\n\n\n\n\n\n\nName\n\n\nType\n\n\nDefault\n\n\nDescription\n\n\n\n\n\n\n\n\n\n\nhost\n\n\nstring\n\n\nlocalhost\n\n\nWildFly domain controller host address.\n\n\n\n\n\n\nport\n\n\nstring\n\n\n9990\n\n\nWildFly domain controller port.\n\n\n\n\n\n\nusername\n\n\nstring\n\n\nadmin\n\n\nThe username for authentication while connecting to the controller.\n\n\n\n\n\n\npassword\n\n\nstring\n\n\nadmin\n\n\nThe password for authentication while connecting to the controller.\n\n\n\n\n\n\ntimeout\n\n\nint\n\n\n5000\n\n\nThe HTTP request timeout, in milliseconds.\n\n\n\n\n\n\n\n\n\n\nversion\n\n\nPrints the version info of the WildFly Application Server release.\n\n\nParameters\n:\n\n\n\n\nNone\n\n\n\n\nReturns\n: (string): WildFly version.\n\n\nexecute\n\n\nExecute operation against management resource.\n\n\nOperation requests allow for low level interaction with the management model. The management model is represented as a tree of addressable resources, where each node in the tree (aka resource) offers a set of operations to execute.\n\n\nAn operation request basically consists of three parts: the address, an operation name and an optional set of parameters.\n\n\nhost = '172.32.1.32'\naddress = [{'host': host},\n           {'server': '{}-0'.format(host)},\n           {'subsystem': 'logging'}]\nparameters = {'name': 'server.log', 'tail': 'true', 'lines': '100'}\nresponse = client.execute('read-log-file', parameters, address)\n\n\n\n\nParameters\n:\n\n\n\n\n\n\n\n\nName\n\n\nType\n\n\nDefault\n\n\nDescription\n\n\n\n\n\n\n\n\n\n\naddress\n\n\nlist\n\n\n[]\n\n\nThe address of wildfly management resource.\n\n\n\n\n\n\noperation\n\n\nstring\n\n\n\n\nThe operation to perfom on resource.\n\n\n\n\n\n\nparameters\n\n\ndict\n\n\nNone\n\n\nParameters to pass to operation.\n\n\n\n\n\n\n\n\nReturns\n (requests.Response): response from operation execution \n\n\nadd\n\n\nCreates a new management resource.\n\n\naddress = [{'profile': 'full-ha'},\n           {'subsystem': 'jmx'},\n           {'remoting-connector': 'jmx'}\nparameters = {'use-management-endpoint': 'false'}\nresponse = client.add(parameters, address)\n\n\n\n\nremove\n\n\nRemove existing management resource.\n\n\naddress = [{'profile': 'full-ha'},\n           {'subsystem': 'jmx'},\n           {'remoting-connector': 'jmx'}\nresponse = client.remove(address)\n\n\n\n\nstart-servers\n\n\nStarts all configured servers in the domain or specific server group that are not currently running.\n\n\nParameters\n:\n\n\n\n\nserver_group (str): Starts all servers within server group that are not currently running. Default = None.\n\n\nblocking (bool): Wait until the servers are fully started before returning from the operation. Default = False.\n\n\n\n\nReturns\n (requests.Response): \n\n\nstop-servers\n\n\nStop all configured servers in the domain or specific server group that are currently running.\n\n\nParameters\n:\n\n\n\n\nserver_group (str): Stops all servers within server group that are currently running. Default = None.\n\n\nblocking (bool): Wait until the servers are fully stopped before returning from the operation. Default = False.\n\n\n\n\nReturns\n (requests.Response): \n\n\nreload-servers\n\n\nReload all configured servers in the domain or specific server group that are currently running.\n\n\nParameters\n:\n\n\n\n\nserver_group (string): Reload all servers within server group that are currently running. Default = None.\n\n\nblocking (bool): Wait until the servers are fully reloaded before returning from the operation. Default = False.\n\n\n\n\nReturns\n (requests.Response): \n\n\nrestart-servers\n\n\nRestart all configured servers in the domain or specific server group that are currently running.\n\n\nParameters\n:\n\n\n\n\nserver_group (string): Restart all servers within server group that are currently running. Default = None.\n\n\nblocking (bool): Wait until the servers are fully restarted before returning from the operation. Default = False.\n\n\n\n\nReturns\n (requests.Response): \n\n\ndeploy\n\n\nDeploy artifact to WildFly.\n\n\nParameters\n:\n\n\n\n\ngroupId (string): \n\n\nartifactId (string):\n\n\nversion (string):\n\n\ntype (string): artifact packaging type. Default: war\n\n\nserver_groups (sting): Default: 'A'\n\n\npath (string): Default: None\n\n\nenabled (bool): Default: True\n\n\n\n\nundeploy\n\n\nUndeploy artifact from WildFly.\n\n\nParameters\n:\n\n\n\n\nartifactId (string):\n\n\ntype (string): artifact packaging type. Default: war\n\n\nserver_groups (sting): Default: all\n\n\n\n\ndeployment_info", 
+            "title": "Client API"
+        }, 
+        {
+            "location": "/api/#client-api", 
+            "text": "To instantiate a  Wildfly  class that will allow you to communicate with a WildFly domain controller, simply do:  from wildfly import Wildfly\nclient = Wildfly(host='localhost')  Parameters :     Name  Type  Default  Description      host  string  localhost  WildFly domain controller host address.    port  string  9990  WildFly domain controller port.    username  string  admin  The username for authentication while connecting to the controller.    password  string  admin  The password for authentication while connecting to the controller.    timeout  int  5000  The HTTP request timeout, in milliseconds.", 
+            "title": "Client API"
+        }, 
+        {
+            "location": "/api/#version", 
+            "text": "Prints the version info of the WildFly Application Server release.  Parameters :   None   Returns : (string): WildFly version.", 
+            "title": "version"
+        }, 
+        {
+            "location": "/api/#execute", 
+            "text": "Execute operation against management resource.  Operation requests allow for low level interaction with the management model. The management model is represented as a tree of addressable resources, where each node in the tree (aka resource) offers a set of operations to execute.  An operation request basically consists of three parts: the address, an operation name and an optional set of parameters.  host = '172.32.1.32'\naddress = [{'host': host},\n           {'server': '{}-0'.format(host)},\n           {'subsystem': 'logging'}]\nparameters = {'name': 'server.log', 'tail': 'true', 'lines': '100'}\nresponse = client.execute('read-log-file', parameters, address)  Parameters :     Name  Type  Default  Description      address  list  []  The address of wildfly management resource.    operation  string   The operation to perfom on resource.    parameters  dict  None  Parameters to pass to operation.     Returns  (requests.Response): response from operation execution", 
+            "title": "execute"
+        }, 
+        {
+            "location": "/api/#add", 
+            "text": "Creates a new management resource.  address = [{'profile': 'full-ha'},\n           {'subsystem': 'jmx'},\n           {'remoting-connector': 'jmx'}\nparameters = {'use-management-endpoint': 'false'}\nresponse = client.add(parameters, address)", 
+            "title": "add"
+        }, 
+        {
+            "location": "/api/#remove", 
+            "text": "Remove existing management resource.  address = [{'profile': 'full-ha'},\n           {'subsystem': 'jmx'},\n           {'remoting-connector': 'jmx'}\nresponse = client.remove(address)", 
+            "title": "remove"
+        }, 
+        {
+            "location": "/api/#start-servers", 
+            "text": "Starts all configured servers in the domain or specific server group that are not currently running.  Parameters :   server_group (str): Starts all servers within server group that are not currently running. Default = None.  blocking (bool): Wait until the servers are fully started before returning from the operation. Default = False.   Returns  (requests.Response):", 
+            "title": "start-servers"
+        }, 
+        {
+            "location": "/api/#stop-servers", 
+            "text": "Stop all configured servers in the domain or specific server group that are currently running.  Parameters :   server_group (str): Stops all servers within server group that are currently running. Default = None.  blocking (bool): Wait until the servers are fully stopped before returning from the operation. Default = False.   Returns  (requests.Response):", 
+            "title": "stop-servers"
+        }, 
+        {
+            "location": "/api/#reload-servers", 
+            "text": "Reload all configured servers in the domain or specific server group that are currently running.  Parameters :   server_group (string): Reload all servers within server group that are currently running. Default = None.  blocking (bool): Wait until the servers are fully reloaded before returning from the operation. Default = False.   Returns  (requests.Response):", 
+            "title": "reload-servers"
+        }, 
+        {
+            "location": "/api/#restart-servers", 
+            "text": "Restart all configured servers in the domain or specific server group that are currently running.  Parameters :   server_group (string): Restart all servers within server group that are currently running. Default = None.  blocking (bool): Wait until the servers are fully restarted before returning from the operation. Default = False.   Returns  (requests.Response):", 
+            "title": "restart-servers"
+        }, 
+        {
+            "location": "/api/#deploy", 
+            "text": "Deploy artifact to WildFly.  Parameters :   groupId (string):   artifactId (string):  version (string):  type (string): artifact packaging type. Default: war  server_groups (sting): Default: 'A'  path (string): Default: None  enabled (bool): Default: True", 
+            "title": "deploy"
+        }, 
+        {
+            "location": "/api/#undeploy", 
+            "text": "Undeploy artifact from WildFly.  Parameters :   artifactId (string):  type (string): artifact packaging type. Default: war  server_groups (sting): Default: all", 
+            "title": "undeploy"
+        }, 
+        {
+            "location": "/api/#deployment_info", 
+            "text": "", 
+            "title": "deployment_info"
+        }, 
+        {
+            "location": "/change_log/", 
+            "text": "Change Log\n\n\n0.0.2\n\n\n\n\nImplemented first version of the client", 
+            "title": "Change Log"
+        }, 
+        {
+            "location": "/change_log/#change-log", 
+            "text": "", 
+            "title": "Change Log"
+        }, 
+        {
+            "location": "/change_log/#002", 
+            "text": "Implemented first version of the client", 
+            "title": "0.0.2"
+        }, 
+        {
+            "location": "/contributing/", 
+            "text": "Contributing", 
+            "title": "Contributing"
+        }, 
+        {
+            "location": "/contributing/#contributing", 
+            "text": "", 
+            "title": "Contributing"
+        }
+    ]
+}
