@@ -17,7 +17,7 @@ pip install  git+git://github.com/cenx-cf/wildfly-py
 Documentation
 ------------
 
-Full documentation is hosted on [ReadTheDocs](http://cenx-cf.github.io/wildfly-py/).
+Full documentation is hosted on [ReadTheDocs](http://wildfly-py.readthedocs.io/).
 Sources are available in the [docs](docs/) directory.
 
 
