@@ -2,11 +2,10 @@ site_name: wildfly-py Documentation
 site_description: An API client for WildFly written in Python
 site_favicon: 
 site_url: http://wildfly-py.readthedocs.org
-repo_url: https://github.com/docker/wildfly-py/
+repo_url: https://github.com/cenx-cf/wildfly-py
 theme: readthedocs
 pages:
 - Home: index.md
 - Client API: api.md
 - Change Log: change_log.md
-- Contributing: contributing.md
-                      
+- Contributing: contributing.md                     
