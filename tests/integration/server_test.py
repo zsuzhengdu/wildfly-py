@@ -1,5 +1,6 @@
 import socket
-from . import base
+
+from tests.integration import base
 from wildfly.api.deployment import DEFAULT_SERVER_GROUP
 
 

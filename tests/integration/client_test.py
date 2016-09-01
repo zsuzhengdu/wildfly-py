@@ -1,10 +1,12 @@
 import time
 import unittest
+
 import requests
+
+import base
 import wildfly
 import wildfly.util
 from wildfly.api.deployment import DEFAULT_SERVER_GROUP
-import base
 
 
 class ConnectionTimeoutTest(unittest.TestCase):

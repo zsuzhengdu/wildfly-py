@@ -1,12 +1,13 @@
-import os
 import errno
-import unittest
 import logging
-import requests
-import wildfly.util
-from wildfly.api.deployment import DEFAULT_SERVER_GROUP
-from . import base
+import os
+import unittest
 
+import requests
+
+import wildfly.util
+from tests.integration import base
+from wildfly.api.deployment import DEFAULT_SERVER_GROUP
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
