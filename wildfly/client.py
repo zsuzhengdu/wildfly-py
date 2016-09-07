@@ -34,6 +34,7 @@ class Client(requests.Session,
         self.password = password
         self.host = host
         self.port = port
+        self.timeout = timeout
         self.endpoint = 'http://{}:{}/management'.format(self.host, self.port)
 
     def _post(self, request):
@@ -52,15 +53,9 @@ class Client(requests.Session,
                 'Response Status Code: {}: {}'.format(
                     response.status_code,
                     response.reason))
-        elif response.status_code == 500:
-            logger.debug(
-                'Response Status Code: {}: {}'.format(
-                    response.status_code,
-                    response.json()))
+            return response
         else:
             response.raise_for_status()
-        logger.debug('Response: {}'.format(response.json()))
-        return response
 
     def execute(self, operation, parameters={}, address=[]):
         """ Execute operation on resource. """
@@ -144,7 +139,6 @@ class Client(requests.Session,
                                 {'child-type': child_type,
                                  'include-runtime': runtime},
                                 address)
-        logger.debug(response.json())
         return response.json()['result'] if util.is_success(response) else None
 
     def read_operation_names(self, address=[]):

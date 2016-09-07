@@ -2,11 +2,10 @@ import os
 import errno
 import logging
 import requests
-import socket
 from .. import util
 
 
-DEFAULT_CONTENT_HOST = socket.gethostbyname('nexus')
+DEFAULT_CONTENT_HOST = 'nexus'
 DEFAULT_CONTENT_HOST_ENDPOINT = None
 DEFAULT_CONTENT_HOST_PORT = '8081'
 DEFAULT_SERVER_GROUP = 'main-server-group'
@@ -22,7 +21,7 @@ class DeploymentApiMixin(object):
         """ Returns information about deployments. """
 
         # status['RUNNING', 'STOPPED', 'FAILED']
-        deployments = self.read_children_resources('deployment')
+        deployments = self  .read_children_resources('deployment')
         for key in deployments:
             deployments[key]['server-groups'] = []
             deployments[key]['enabled'] = False
@@ -38,8 +37,6 @@ class DeploymentApiMixin(object):
                     key]['enabled']
                 if 'server-groups' in deployments[key]:
                     deployments[key]['server-groups'].append(_server_group)
-                else:
-                    deployments[key]['server-groups'] = [_server_group]
 
         servers = self.servers()
         for server in servers:
@@ -61,10 +58,10 @@ class DeploymentApiMixin(object):
                 if server_group not in deployments[key]['server-groups']:
                     del deployments[key]
 
-        if host:
-            for key in deployments.keys():
-                if host not in deployments[key]['hosts']:
-                    del deployments[key]
+        # if host:
+        #     for key in deployments.keys():
+        #         if host not in deployments[key]['hosts']:
+        #             del deployments[key]
 
         return deployments
 
@@ -111,14 +108,18 @@ class DeploymentApiMixin(object):
             force=True,
             content_host=DEFAULT_CONTENT_HOST,
             content_host_ep=DEFAULT_CONTENT_HOST_ENDPOINT,
-            content_host_port=DEFAULT_CONTENT_HOST_PORT):
+            content_host_port=DEFAULT_CONTENT_HOST_PORT,
+            scheme="http"):
+
         """ Deploy artifact to WildFly. """
         if path is None:
             if content_host_ep == 'nexus':
                 if 'SNAPSHOT' not in version:
-                    BASE_URL = '{}:{}/nexus/service/local/repo_groups' \
-                        '/public/content'.format(content_host,
-                                                 content_host_port)
+                    BASE_URL = '{}://{}:{}/{}/service/local/repo_groups' \
+                           '/public/content'.format(scheme,
+                                                    content_host,
+                                                    content_host_port,
+                                                    content_host_ep)
 
                     url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(
                         BASE_URL,
@@ -128,10 +129,11 @@ class DeploymentApiMixin(object):
                         type
                     )
                 else:
-                    BASE_URL = 'http://{}:{}/nexus/service/local/artifact' \
-                        '/maven/content?r=public'.format(content_host,
-                                                         content_host_port)
-
+                    BASE_URL = '{}://{}:{}/{}/service/local/artifact' \
+                           '/maven/content?r=public'.format(scheme,
+                                                            content_host,
+                                                            content_host_port,
+                                                            content_host_ep)
                     url = '{0}&g={1}&a={2}&v={3}&p={4}'.format(
                         BASE_URL,
                         groupId.replace('.', '/'),
@@ -141,8 +143,10 @@ class DeploymentApiMixin(object):
                     )
 
             elif content_host_ep == 'maven2':
-                BASE_URL = '{}:{}/maven2'.format(content_host,
-                                                 content_host_port)
+                BASE_URL = '{}://{}:{}/{}'.format(scheme,
+                                                  content_host,
+                                                  content_host_port,
+                                                  content_host_ep)
                 url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(
                     BASE_URL,
                     groupId.replace('.', '/'),
@@ -150,8 +154,9 @@ class DeploymentApiMixin(object):
                     version,
                     type)
             elif content_host_ep is None:
-                BASE_URL = '{}:{}/service/local/repositories/releases' \
-                    '/content'.format(content_host, content_host_port)
+                BASE_URL = '{}://{}:{}/service/local/repositories/releases/content'.format(scheme,
+                                                                                           content_host,
+                                                                                           content_host_port)
                 url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(
                     BASE_URL,
                     groupId.replace('.', '/'),
@@ -164,8 +169,6 @@ class DeploymentApiMixin(object):
                 raise Exception("Content host type {} not supported"
                                 .format(content_host_ep))
 
-            url = 'http://' + url
-
             # check if url exists
             response = requests.head(url)
             if response.status_code is not 200:
@@ -173,9 +176,7 @@ class DeploymentApiMixin(object):
 
             # upload artifact from url to content repository
             response = self.execute('upload-deployment-url', {'url': url})
-
         else:
-
             # check if file exists
             if not os.path.isfile(path):
                 raise IOError(errno.ENOENT, os.strerror(errno.ENOENT), path)
@@ -233,6 +234,7 @@ class DeploymentApiMixin(object):
         response = self.execute('undeploy', address=address)
         if not util.is_success(response):
             logging.debug("Failed to disable artifact: {}".format(name))
+        return response
 
     def enable(self, name, server_groups=DEFAULT_SERVER_GROUP):
         """ Enable artifact in given server_groups. """
@@ -242,6 +244,7 @@ class DeploymentApiMixin(object):
         response = self.execute('deploy', address=address)
         if not util.is_success(response):
             logging.debug("Failed to enable artifact: {}".format(name))
+        return response
 
     def undeploy(self, name, server_groups=DEFAULT_SERVER_GROUP):
         """ Undeploy artifact from WildFly. """
