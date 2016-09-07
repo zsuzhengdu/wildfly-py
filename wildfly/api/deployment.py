@@ -2,6 +2,7 @@ import os
 import errno
 import logging
 import requests
+import socket
 from .. import util
 
 
@@ -120,7 +121,6 @@ class DeploymentApiMixin(object):
                                                     content_host,
                                                     content_host_port,
                                                     content_host_ep)
-
                     url = '{0}/{1}/{2}/{3}/{2}-{3}.{4}'.format(
                         BASE_URL,
                         groupId.replace('.', '/'),

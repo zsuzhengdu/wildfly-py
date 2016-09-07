@@ -6,6 +6,7 @@ import wildfly
 
 DEFAULT_WILDFLY_VERSION = '8.2.0.Final'
 WILDFLY_CONTAINER_NAME = 'wildfly'
+
 UNEXPECTED_EXCEPTION_FORMAT = 'Unexpected Exception: {}.'
 
 
