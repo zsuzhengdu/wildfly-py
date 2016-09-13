@@ -31,27 +31,13 @@ class Client(requests.Session,
             username=DEFAULT_MANAGEMENT_USER,
             password=DEFAULT_MANAGEMENT_PWD,
             timeout=DEFAULT_TIMEOUT):
-        """
-        Creates an object that interacts with WildFly via HTTP request
-        :param  hostname  The hostname of the WildFly domain controller
-        :param  port      The port used to access the WildFly UI
-        :param  username  The WildFly username
-        :param  password  The WildFly username's password
-        :param  timeout   The timeout
-        """
-    def __init__(
-            self,
-            host,
-            port=DEFAULT_MANAGEMENT_PORT,
-            username=DEFAULT_MANAGEMENT_USER,
-            password=DEFAULT_MANAGEMENT_PWD,
-            timeout=DEFAULT_TIMEOUT):
 
         super(Client, self).__init__()
         self.username = username
         self.password = password
         self.host = host
         self.port = port
+        self.timeout = timeout
         self.endpoint = 'http://{}:{}/management'.format(self.host, self.port)
 
     def _post(self, request):

@@ -41,6 +41,7 @@ class DeploymentApiMixin(object):
                     deployments[key]['server-groups'] = [_server_group]
 
         servers = self.servers()
+
         for server in servers:
             if servers[server]['status'] != 'STOPPED':
                 deployments_on_server = self.read_children_resources(
@@ -50,6 +51,7 @@ class DeploymentApiMixin(object):
                 logger.debug(
                     'DEPLOYMENTS_ON_SERVER({}): {}'.format(
                         server, deployments_on_server))
+
                 for key in deployments_on_server:
                     if deployments_on_server[key]['status'] == 'OK':
                         deployments[key]['status'] = 'RUNNING'
@@ -168,7 +170,6 @@ class DeploymentApiMixin(object):
 
             # upload artifact from url to content repository
             response = self.execute('upload-deployment-url', {'url': url})
-
         else:
 
             # check if file exists
@@ -196,6 +197,9 @@ class DeploymentApiMixin(object):
         # replaceDeployment(ctx, f, deploymentUrl, name, runtimeName, disabled)
         # return
 
+        # add artifact to content repository
+        byte_value = response.json()['result']['BYTES_VALUE']
+
         # https://github.com/cenx-cf/wildfly-py/issues/5
         if type == 'war':
             runtime_name = artifactId + '-' + version + '.' + type
@@ -203,16 +207,24 @@ class DeploymentApiMixin(object):
             runtime_name = artifactId.split(
                 '-')[-2] + '-resources' + '.' + type
 
-        # add artifact to content repository
-        byte_value = response.json()['result']['BYTES_VALUE']
-        request = {"content": [{"hash": {"BYTES_VALUE": byte_value}}],
+        # TODO: Test 'name' option besides 'runtime-name' option
+        if type == 'war':
+            name = artifactId + '.' + type
+            request = {"content": [{"hash": {"BYTES_VALUE": byte_value}}],
+                   "address": [{"deployment": "{}".format(name)}],
+                   "operation": "add",
+                   "runtime-name": runtime_name}
+        elif type == 'jar':
+            name = runtime_name
+            request = {"content": [{"hash": {"BYTES_VALUE": byte_value}}],
                    "address": [{"deployment": "{}".format(runtime_name)}],
                    "operation": "add"}
+
         response = self._post(request)
 
         # add artifact to server-group(s)
         address = [{'server-group': server_groups},
-                   {'deployment': '{}'.format(runtime_name)}]
+                   {'deployment': '{}'.format(name)}]
         response = self.add(address, {'enabled': enabled})
 
     def disable(self, name, server_groups=DEFAULT_SERVER_GROUP):
