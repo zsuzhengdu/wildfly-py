@@ -261,7 +261,7 @@ class DeploymentApiMixin(object):
 
     def _download_from_bamboo(self):
 
-        print "NOT YET IMPLEMENTED"
+        print("NOT YET IMPLEMENTED")
         # ATLASSIAN_USER=ian.kent
         # wget -nv --http-user=$ATLASSIAN_USER --ask-password
         # http://cenx-cf.atlassian.net/builds/browse/UI-APOLLO-$APP_BUILD/artifact/shared/apollo-app/apollo.war?os_authType=basic
